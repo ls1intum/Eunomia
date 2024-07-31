@@ -1,5 +1,7 @@
 import logging
 
+import torch
+
 from app.database.email_database import EmailDatabase
 from app.model.model_manager import ModelManager
 from app.model.zero_shot_model import ZeroShotModel
@@ -13,12 +15,15 @@ if __name__ == "__main__":
     preprocessor = SimplePreprocessor()
     model_directory = "./models"
     # model_name = "bert"
+    # model_name = "llama"
+    model_name = "distilbert"
     # model_name = "logistic_regression" # also need sensitive
     # model_name = "zero_shot"
     # model_name = "few_shot"
-    model_name = "one_class_svm"
+    # model_name = "one_class_svm"
     retrain = True
     app = ModelManager(email_db=db_client, preprocessor=preprocessor, model_name=model_name, retrain=retrain)
+    logger.info("initialized")
     if not app.model.is_trained and not isinstance(app.model, ZeroShotModel) or retrain:
         logger.info("not zero shot model")
         app.train_model()

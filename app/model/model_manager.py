@@ -7,7 +7,9 @@ from sklearn.model_selection import train_test_split
 from app.common.singleton import Singleton
 from app.database.email_database import EmailDatabase
 from app.model.bert_model import BERTModel
+from app.model.distilbert_model import DistilBertModel
 from app.model.few_shot_model import FewShotModel
+from app.model.llama_model import LlamaClassifier
 from app.model.logistic_regression_model import LogisticRegressionModel
 from app.model.model import Model
 from app.model.one_class_svm_model import OneClassSVMModel
@@ -41,6 +43,10 @@ class ModelManager(metaclass=Singleton):
             model = OneClassSVMModel(load_directory=load_directory, retrain=self.retrain)
         elif self.model_name == "few_shot":
             model = FewShotModel(load_directory=load_directory, retrain=self.retrain)
+        elif self.model_name == "llama":
+            model = LlamaClassifier(load_directory=load_directory, retrain=self.retrain)
+        elif self.model_name == "distilbert":
+            model = DistilBertModel(load_directory=load_directory, retrain=self.retrain)
         else:
             raise ValueError(f"Unsupported model type: {self.model_name}")
 
@@ -48,7 +54,9 @@ class ModelManager(metaclass=Singleton):
 
     def save_model(self) -> None:
         if not os.path.exists(self.model_directory):
+            logger.info("create new directory")
             os.makedirs(self.model_directory)
+        logger.info(f"saving model under {self.model_path}")
         self.model.save_model(self.model_path)
 
     def get_model(self) -> Model:

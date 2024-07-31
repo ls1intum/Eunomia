@@ -1,14 +1,12 @@
-import os
-import email
 import logging
+import os
+import re
+from base64 import b64decode
 from email import policy
 from email.parser import BytesParser
 from email.utils import getaddresses
-from typing import Dict, List, Optional
-from base64 import b64decode
 from quopri import decodestring as quopri_decode
-import re
-from bs4 import BeautifulSoup
+from typing import List
 
 from app.domain.data.email_dto import EmailDTO
 
@@ -26,7 +24,7 @@ class EmailParser:
 
         email_data = self._extract_headers(msg)
         body_plain, body_html = self._extract_body(msg)
-        email_data['body_plain'] = body_plain
+        email_data['body_plain'] = self._extract_first_email(body_plain)
         email_data['body_html'] = body_html
         return EmailDTO(**email_data, sensitive=sensitive)
 
@@ -68,6 +66,15 @@ class EmailParser:
             payload = quopri_decode(payload).decode(charset, errors='ignore')
         return payload
 
+    def _extract_first_email(self, text: str) -> str:
+        # Muster für Datum und Uhrzeit der eingebetteten E-Mail
+        date_pattern = re.compile(r'Am \d{2}\.\d{2}\.\d{4} um \d{2}:\d{2} schrieb .*:')
+        matches = list(date_pattern.finditer(text))
+        if not matches:
+            return text.strip()
+        last_match = matches[-1]
+        first_email = text[last_match.end():].strip()
+        return first_email
     def process_eml_files_in_directory(self, directory_path: str, sensitive: bool) -> List[EmailDTO]:
         eml_files = [f for f in os.listdir(directory_path) if f.endswith('.eml')]
         email_data = []

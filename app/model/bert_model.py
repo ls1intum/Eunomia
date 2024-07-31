@@ -11,7 +11,8 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 class BERTModel(Model):
-    def __init__(self, model_name="bert-base-german-cased", load_directory: str = None, retrain: bool = False):
+    def __init__(self, model_name="bert-base-multilingual-cased", load_directory: str = None, retrain: bool = False):
+    # def __init__(self, model_name="bert-base-german-cased", load_directory: str = None, retrain: bool = False):
         super().__init__()
         if load_directory and not retrain:
             self.load_model(load_directory)
@@ -19,6 +20,9 @@ class BERTModel(Model):
             logger.info("retraining:")
             self.tokenizer = BertTokenizer.from_pretrained(model_name)
             self.model = BertForSequenceClassification.from_pretrained(model_name, num_labels=2)
+            self.device = torch.device("mps") if torch.backends.mps.is_available() else torch.device("cpu")
+            logger.info(f"running on:{self.device} ")
+            self.model.to(self.device)
             self.is_trained = False
 
     def train(self, data: List[Tuple[str, int]], val_data: List[Tuple[str, int]] = None) -> None:
@@ -52,6 +56,7 @@ class BERTModel(Model):
             save_total_limit=2,
             eval_strategy="steps",
             eval_steps=10,
+            no_cuda=True
         )
 
         trainer = Trainer(
@@ -84,4 +89,6 @@ class BERTModel(Model):
     def load_model(self, load_directory: str) -> None:
         self.tokenizer = BertTokenizer.from_pretrained(load_directory)
         self.model = BertForSequenceClassification.from_pretrained(load_directory)
+        self.device = torch.device("mps") if torch.backends.mps.is_available() else torch.device("cpu")
+        self.model.to(self.device)
         self.is_trained = True

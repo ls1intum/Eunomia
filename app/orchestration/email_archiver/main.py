@@ -13,12 +13,12 @@ def main():
     directory_path = os.getenv('EMAIL_DIRECTORY')
     logger.info(f"Lets parse: ")
     logger.info(f"Email directory: {directory_path} ")
-    # parser = EmailParser()
-    # emails = parser.process_eml_files_in_directory(directory_path, False)
-    # logger.info(f"Get an example: ")
-    # logger.info(f"Emails: {emails[0]}")
-    # storage = EmailDatabase()
-    # storage.store_emails(emails)
+    parser = EmailParser()
+    emails = parser.process_eml_files_in_directory(directory_path, False)
+    logger.info(f"Get an example: ")
+    logger.info(f"Of {len(emails)} Emails the first is: {emails[0]}")
+    storage = EmailDatabase()
+    storage.store_emails(emails)
 
 if __name__ == '__main__':
     main()
