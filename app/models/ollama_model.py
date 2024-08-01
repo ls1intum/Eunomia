@@ -29,9 +29,4 @@ class OllamaModel:
         logging.info(f"Got prompt, {messages}")
         logging.info(f"Got the response for: {self.model}, {response}")
         return response.choices[0]["message"]["content"]
-        # data = {}
-        # data['classification'] = 'non-sensitive'
-        # data['confidence'] = '50%'
-        # logging.info("Completed")
-        # return data
 
