@@ -5,17 +5,18 @@ from dotenv import load_dotenv
 
 from app.common.text_cleaner import TextCleaner
 from app.email_service.email_dto import EmailDTO
-from app.models.ollama_model import OllamaModel
+from app.models.ollama_model import BaseModelClient
 
 
 class EmailClassifier:
-    def __init__(self, model: OllamaModel):
+    def __init__(self, model: BaseModelClient):
         self.model = model
     def classify_email(self, email: EmailDTO):
         logging.info("Classifying email...")
         cleansed_text = TextCleaner.cleanse_text(email.body)
         result = self.request_llm(email_body=cleansed_text, email_subject=email.subject)
-        return self.parse_classification_result(result)
+        # return self.parse_classification_result(result)
+        return result
 
     def request_llm(self, email_body, email_subject):
         logging.info(f"Requesting LLM")
