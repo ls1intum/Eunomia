@@ -1,16 +1,17 @@
 import logging
 
+from app.email_service.email_client import EmailClient
 from app.email_service.email_dto import InboxType
 
 
 class EmailFetcher:
-    def __init__(self, email_client):
+    def __init__(self, email_client: EmailClient):
         self.email_client = email_client
         logging.info("EmailFetcher initialized")
 
     def fetch_raw_emails(self, folder="inbox"):
         logging.info("EmailFetcher fetching raw emails from folder: %s", folder)
-        connection = self.email_client.get_connection()
+        connection = self.email_client.get_imap_connection()
 
         connection.select(folder)
         status, messages = connection.search(None, InboxType.Unseen.value)
