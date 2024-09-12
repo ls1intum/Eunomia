@@ -33,7 +33,20 @@ class EmailProcessor:
                 content_disposition = str(part.get("Content-Disposition"))
                 if "attachment" not in content_disposition:
                     if content_type == "text/plain":
-                        return part.get_payload(decode=True).decode()
+                        charset = part.get_content_charset()
+                        if charset is None:
+                            charset = 'utf-8'  # Default to utf-8 if charset is not specified
+                        try:
+                            return part.get_payload(decode=True).decode(charset)
+                        except UnicodeDecodeError:
+                            # Handle cases where the charset might be incorrect or unsupported
+                            return part.get_payload(decode=True).decode('latin1')
         else:
-            return msg.get_payload(decode=True).decode()
+            charset = msg.get_content_charset()
+            if charset is None:
+                charset = 'utf-8'
+            try:
+                return msg.get_payload(decode=True).decode(charset)
+            except UnicodeDecodeError:
+                return msg.get_payload(decode=True).decode('latin1')
         return ""
