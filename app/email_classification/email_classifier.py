@@ -1,26 +1,23 @@
 import logging
-import os
-import requests
-from dotenv import load_dotenv
 
 from app.common.text_cleaner import TextCleaner
+from app.email_classification.classifier import Classifier
 from app.email_service.email_dto import EmailDTO
 from app.models.ollama_model import BaseModelClient
+from app.prompts.classification_prompts import generate_classification_prompt
 
 
-class EmailClassifier:
+class EmailClassifier(Classifier):
     def __init__(self, model: BaseModelClient):
-        self.model = model
-    def classify_email(self, email: EmailDTO):
+        super().__init__(model)
+
+    def classify(self, email: EmailDTO):
         logging.info("Classifying email...")
         cleansed_text = TextCleaner.cleanse_text(email.body)
-        result = self.request_llm(email_body=cleansed_text, email_subject=email.subject)
+        prompt = generate_classification_prompt(body=cleansed_text, subject=email.subject)
+        result = self.request_llm(prompt)
         # return self.parse_classification_result(result)
         return result
-
-    def request_llm(self, email_body, email_subject):
-        logging.info(f"Requesting LLM")
-        return self.model.complete(email_body, email_subject)
 
     @staticmethod
     def parse_classification_result(result):

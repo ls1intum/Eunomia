@@ -1,21 +1,22 @@
 import imaplib
 import logging
-import os
 import smtplib
 
 from dotenv import load_dotenv
+
+from app.common.environment import config
 
 load_dotenv("./../development.env")
 
 
 class EmailClient:
     def __init__(self):
-        self.username = os.getenv("EMAIL_ADDRESS")
-        self.password = os.getenv("EMAIL_PASSWORD")
-        self.imap_server = os.getenv("IMAP_SERVER")
-        self.smtp_server = os.getenv("SMTP_SERVER")
-        self.imap_port = int(os.getenv("IMAP_PORT"))
-        self.smtp_port = int(os.getenv("SMTP_PORT"))
+        self.username = config.EMAIL_ADDRESS
+        self.password = config.EMAIL_PASSWORD
+        self.imap_server = config.IMAP_SERVER
+        self.smtp_server = config.SMTP_SERVER
+        self.imap_port = int(config.IMAP_PORT)
+        self.smtp_port = int(config.SMTP_PORT)
         self.imap_connection = None
         self.smtp_connection = None
         logging.info("EmailClient initialized")
@@ -61,3 +62,31 @@ class EmailClient:
     def connect(self):
         self.connect_imap()
         self.connect_smtp()
+
+    def search_by_message_id(self, message_id):
+        self.imap_connection.select('inbox')
+        logging.info(f"Searching for message with ID: {message_id}...")
+
+        result, data = self.imap_connection.search(None, f'(HEADER Message-ID "{message_id}")')
+
+        if result == 'OK':
+            email_uids = data[0].split()
+            if email_uids:
+                logging.info(f"Found email with UID: {email_uids[-1]}")
+                return email_uids[-1]
+            else:
+                logging.warning(f"No email found with Message-ID: {message_id}")
+                return None
+        else:
+            logging.error(f"Search failed for Message-ID: {message_id}")
+            return None
+
+    def flag_email(self, email_uid):
+        if email_uid:
+            result, response = self.imap_connection.uid('STORE', email_uid, '+FLAGS', '(\Flagged)')
+            if result == 'OK':
+                logging.info(f"Email with UID {email_uid} has been successfully flagged.")
+            else:
+                logging.error(f"Failed to flag the email with UID {email_uid}.")
+        else:
+            logging.error("Invalid UID. No email to flag.")
