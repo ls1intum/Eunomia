@@ -1,6 +1,7 @@
 import logging
 import os
 
+from app.common.environment import config
 from app.common.text_cleaner import TextCleaner
 from app.email_classification.classifier import Classifier
 from app.models.ollama_model import BaseModelClient
@@ -23,7 +24,7 @@ class StudyProgramClassifier(Classifier):
 
     @staticmethod
     def get_study_programs():
-        base_folder = os.getenv("STUDY_PROGRAMS_FOLDER")
+        base_folder = config.STUDY_PROGRAMS_FOLDER
         study_programs_file = os.path.join(base_folder, "study_programs.txt")
         study_programs = StudyProgramClassifier.load_study_programs(study_programs_file)
         study_programs_str = ", ".join(study_programs)
@@ -46,4 +47,3 @@ class StudyProgramClassifier(Classifier):
         with open(file_path, 'r') as f:
             study_programs = [line.strip() for line in f.readlines() if line.strip()]
         return study_programs
-

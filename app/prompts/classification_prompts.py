@@ -9,7 +9,9 @@ def generate_classification_prompt(subject, body):
                     "addressed through general information or do not require counselor intervention"
                     "Do not explain your decision or try to justify it. Respond with only the category"},
         {"role": "user", "content": f"Email Subject: {subject}\n\nEmail Body:\n{body}"},
-        {"role": "assistant", "content": "Classify the email accordingly."}
+        {"role": "assistant",
+         "content": "Classify the email accordingly. Give always an answer! If you are unsure classify the Email as "
+                    "'sensitive'."}
     ]
     return classification_prompt
 

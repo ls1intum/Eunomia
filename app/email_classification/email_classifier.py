@@ -1,7 +1,4 @@
 import logging
-import os
-import requests
-from dotenv import load_dotenv
 
 from app.common.text_cleaner import TextCleaner
 from app.email_classification.classifier import Classifier

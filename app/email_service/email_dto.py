@@ -3,11 +3,10 @@ from dataclasses import dataclass, field
 from email.message import Message
 from typing import List, Optional
 
+
 class InboxType(enum.Enum):
     All = 'ALL'
     Unseen = 'UNSEEN'
-
-
 
 
 @dataclass
@@ -81,7 +80,7 @@ class EmailDTO:
             "charset": msg.get_content_charset(),
             "content_transfer_encoding": headers.get("Content-Transfer-Encoding", [None])[0],
             "subject": headers.get("Subject", [None])[0],
-            "message_id": headers.get("Message-ID", [None])[0],
+            "message_id": headers.get("Message-Id", [None])[0],
             "date": headers.get("Date", [None])[0],
             "to": headers.get("To", [None])[0],
             "x_mailer": headers.get("X-Mailer", [None])[0],

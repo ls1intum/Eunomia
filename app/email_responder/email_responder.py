@@ -1,4 +1,3 @@
-import os
 import logging
 import time
 import traceback
@@ -10,7 +9,7 @@ from app.email_service.email_client import EmailClient
 from app.email_service.email_fetcher import EmailFetcher
 from app.email_service.email_processor import EmailProcessor
 from app.email_service.email_sender import EmailSender
-from app.models.ollama_model import get_model_client
+from app.models.model_loader import get_model_client
 
 
 class EmailResponder:
@@ -19,12 +18,9 @@ class EmailResponder:
         self.email_fetcher = EmailFetcher(self.email_client)
         self.email_processor = EmailProcessor()
         self.email_sender = EmailSender(self.email_client)
-        use_azure = False
         # self.model_api_key = os.getenv("LLAMA_MODEL_TOKEN")
-        self.model_api_key = os.getenv("LLAMA_MODEL_TOKEN")
-        self.model_url = os.getenv("LLAMA_MODEL_URI") if use_azure else os.getenv("GPU_URL")
         # self.model_url = os.getenv("LLAMA_MODEL_URI")
-        self.llama = get_model_client(use_openai=use_azure, openai_api_key=self.model_api_key, model_uri=self.model_url)
+        self.llama = get_model_client()
         self.email_classifier = EmailClassifier(self.llama)
         self.study_program_classifier = StudyProgramClassifier(self.llama)
         self.response_service = ResponseService()
@@ -40,7 +36,8 @@ class EmailResponder:
                 for email in emails:
                     classification, confidence = self.email_classifier.classify(email)
                     program_classification, program_confidence = self.study_program_classifier.classify(email)
-                    self.handle_classification(email, classification, confidence, program_classification, program_confidence)
+                    self.handle_classification(email, classification, confidence, program_classification,
+                                               program_confidence)
                 logging.info("Sleeping for 60 seconds before next fetch")
                 time.sleep(60)
         except Exception as e:
@@ -50,17 +47,22 @@ class EmailResponder:
         finally:
             self.email_client.close_connections()
 
-    def handle_classification(self, email, classification,confidence , program_classification, program_confidence):
-        response_content = self.generate_email_response(email, classification)
-        if classification == "non-sensitive" and confidence > 0.8:
+    def handle_classification(self, email, classification, confidence, program_classification, program_confidence):
+        # response_content = self.generate_email_response(email, classification)
+        response_content = None
+        if classification.strip().lower() == "non-sensitive" and confidence > 0.8:
             payload = {
-                "message": response_content,
+                "message": email.body,
                 "study_program": program_classification
             }
-            self.response_service.get_response(payload)
+            response_content = self.response_service.get_response(payload)
             logging.info("api call to angelos was made")
         if response_content:
-            self.email_sender.send_reply_email(original_email=email, reply_body=response_content)
+            self.email_sender.send_reply_email(original_email=email, reply_body=response_content['answer'])
+        else:
+            logging.info("No proper answer can be found or it is classified as non-sensitive")
+            uuid = self.email_client.search_by_message_id(email.message_id)
+            self.email_client.flag_email(uuid)
 
     def generate_email_response(self, email, classification):
         # This method generates a response based on the classification
