@@ -1,8 +1,8 @@
+from pydantic import BaseModel
 
 
-class BaseModelClient:
-    def __init__(self, model: str):
-        self.model = model
-
+class BaseModelClient(BaseModel):
+    model: str
+    
     def complete(self, prompt: []) -> (str, float):
         raise NotImplementedError("This method should be implemented by subclasses.")

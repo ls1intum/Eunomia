@@ -51,6 +51,7 @@ class EmailResponder:
         # response_content = self.generate_email_response(email, classification)
         response_content = None
         if classification.strip().lower() == "non-sensitive" and confidence > 0.8:
+            logging.info("should get a response now ")
             payload = {
                 "message": email.body,
                 "study_program": program_classification
@@ -60,7 +61,7 @@ class EmailResponder:
         if response_content:
             self.email_sender.send_reply_email(original_email=email, reply_body=response_content['answer'])
         else:
-            logging.info("No proper answer can be found or it is classified as non-sensitive")
+            logging.info("No proper answer can be found or it is classified as sensitive")
             uuid = self.email_client.search_by_message_id(email.message_id)
             self.email_client.flag_email(uuid)
 

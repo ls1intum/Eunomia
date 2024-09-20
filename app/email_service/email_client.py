@@ -2,11 +2,7 @@ import imaplib
 import logging
 import smtplib
 
-from dotenv import load_dotenv
-
 from app.common.environment import config
-
-load_dotenv("./../development.env")
 
 
 class EmailClient:

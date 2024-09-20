@@ -1,5 +1,6 @@
 import enum
 from dataclasses import dataclass, field
+from email import header
 from email.message import Message
 from typing import List, Optional
 
@@ -79,7 +80,7 @@ class EmailDTO:
             "content_type": msg.get_content_type(),
             "charset": msg.get_content_charset(),
             "content_transfer_encoding": headers.get("Content-Transfer-Encoding", [None])[0],
-            "subject": headers.get("Subject", [None])[0],
+            "subject": cls.decode_email_subject(headers.get("Subject", [None])[0]),
             "message_id": headers.get("Message-Id", [None])[0],
             "date": headers.get("Date", [None])[0],
             "to": headers.get("To", [None])[0],
@@ -115,6 +116,18 @@ class EmailDTO:
                 headers.get("X-MS-Exchange-Transport-CrossTenant-Headers-Stamped", [None])[0]
         }
         return cls(**email_data)
+
+    @staticmethod
+    def decode_email_subject(encoded_subject):
+        # Decode the subject using email.header
+        decoded_fragments = header.decode_header(encoded_subject)
+
+        # Join decoded parts together, converting bytes to strings if necessary
+        decoded_subject = ''.join(
+            part.decode(encoding if encoding else 'utf-8') if isinstance(part, bytes) else part
+            for part, encoding in decoded_fragments
+        )
+        return decoded_subject
 
     @classmethod
     def from_dict(cls, data: dict):
