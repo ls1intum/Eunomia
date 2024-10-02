@@ -15,4 +15,4 @@ def get_model_client() -> BaseModelClient:
         else:
             return AzureOpenAIModel(model=config.OPENAI_MODEL, azure_deployment=config.AZURE_DEPLOYMENT)
     else:
-        return OllamaModel(model=config.OLLAMA_MODEL, url=config.OLLAMA_URL)
+        return OllamaModel(model=config.GPU_MODEL, embed_model=config.EMBED_MODEL, url=config.OLLAMA_URL)

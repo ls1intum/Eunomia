@@ -12,6 +12,7 @@ class OpenAIModel(BaseModelClient):
 
     def model_post_init(self, __context: Any) -> None:
         self._client = OpenAI(api_key=self.api_key)
+        self.init_model()
 
     def complete(self, prompt: []) -> (str, float):
         response = self._client.chat.completions.create(
@@ -24,3 +25,6 @@ class OpenAIModel(BaseModelClient):
         confidence = float(response['logprobs']['content']) if response.get('logprobs') and response['logprobs'].get(
             'content') is not None else 0.81
         return response.choices[0]["message"]["content"], confidence
+
+    def init_model(self) -> None:
+        self.complete(["HI"])

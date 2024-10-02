@@ -1,7 +1,8 @@
 import logging
-from typing import Dict
+from typing import Dict, Optional
 
 import requests
+from pydantic import ConfigDict
 
 from app.common.environment import config
 from app.models.base_model import BaseModelClient
@@ -19,15 +20,15 @@ def create_auth_header() -> Dict[str, str]:
 
 class OllamaModel(BaseModelClient):
     url: str
+    headers: Optional[Dict[str, str]] = None
+    session: requests.Session = requests.Session()
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def model_post_init(self, **kwargs):
         logging.info("Initializing OllamaModel")
         self.headers = create_auth_header()
-        self.init_session()
         self.init_model()
-
-    def init_session(self):
-        self.session = requests.Session()
 
     def complete(self, prompt: []) -> (str, float):
         response = self.session.post(

@@ -10,3 +10,4 @@ class AzureOpenAIModel(OpenAIModel):
         self._client = AzureOpenAI(
             azure_deployment=self.azure_deployment,
         )
+        self.init_model()

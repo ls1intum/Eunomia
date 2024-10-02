@@ -9,19 +9,24 @@ def generate_classification_prompt(subject, body):
     return classification_prompt
 
 
-def generate_study_program_classification_prompt(message, study_prorgams):
+def generate_study_program_classification_prompt(message, study_programs):
     prompt = [
         {"role": "system", "content": "You are an assistant that classifies questions based on study programs."},
         {"role": "user", "content": f"""
         Given the following question: "{message}", please determine if it is specific to any of the following study programs:
-        {study_prorgams}.
+        {study_programs}.
 
-        If it is specific to one of the study programs, respond with the name of the program. If it is general and 
+        If the question is specific to one of the study programs, respond with the name of the program. If it is general and 
         not specific to any, respond with 'general'. 
-        Do not explain your decision or try to justify it. Respond with only the category. Do not return multiple programs.
-        Answer exactly with the name of the program as written above. If you can not specify whether it is master or bachelor, 
-        strip the program of that specification. 
-        """}
+        Do not explain or justify your decision. Respond with only the category. Return exactly one study program. 
+        Answer with the name of the program exactly as written above. If the program is mentioned without specifying whether 
+        it is a master's or bachelor's program, strip this specification from the name.
 
+        Additionally, determine the language of the question and return both answers in the following JSON format:
+        {{
+            "language": "<language-of-question>",
+            "study_program": "<study-program-of-question>"
+        }}.
+        """}
     ]
     return prompt

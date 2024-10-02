@@ -35,9 +35,9 @@ class EmailResponder:
                 emails = self.email_processor.process_raw_emails(raw_emails)
                 for email in emails:
                     classification, confidence = self.email_classifier.classify(email)
-                    program_classification, program_confidence = self.study_program_classifier.classify(email)
+                    program_classification, language = self.study_program_classifier.classify(email)
                     self.handle_classification(email, classification, confidence, program_classification,
-                                               program_confidence)
+                                               language)
                 logging.info("Sleeping for 60 seconds before next fetch")
                 time.sleep(60)
         except Exception as e:
@@ -47,14 +47,15 @@ class EmailResponder:
         finally:
             self.email_client.close_connections()
 
-    def handle_classification(self, email, classification, confidence, program_classification, program_confidence):
+    def handle_classification(self, email, classification, confidence, program_classification, language):
         # response_content = self.generate_email_response(email, classification)
         response_content = None
         if classification.strip().lower() == "non-sensitive" and confidence > 0.8:
             logging.info("should get a response now ")
             payload = {
                 "message": email.body,
-                "study_program": program_classification
+                "study_program": program_classification,
+                "language": language,
             }
             response_content = self.response_service.get_response(payload)
             logging.info("api call to angelos was made")
