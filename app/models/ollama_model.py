@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Optional
+from typing import Dict, Optional, Any
 
 import requests
 from pydantic import ConfigDict
@@ -25,7 +25,7 @@ class OllamaModel(BaseModelClient):
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    def model_post_init(self, **kwargs):
+    def model_post_init(self, __context: Any) -> None:
         logging.info("Initializing OllamaModel")
         self.headers = create_auth_header()
         self.init_model()
@@ -34,16 +34,16 @@ class OllamaModel(BaseModelClient):
         response = self.session.post(
             f"{self.url}chat",
             json={"model": self.model, "messages": prompt, "stream": False,
-                  "options": {"logprobs": True, "temperature": 0.3}},
+                  "options": {"temperature": 0.2, "max_tokens": 128}, "format": "json"},
             headers=self.headers
         )
         response_data = response.json()
         logging.info(f"Got response for model {self.model}: {response_data}")
         response.raise_for_status()
         logging.info(f"Got prompt: {prompt}")
-        confidence = float(response_data['logprobs']['content']) if response_data.get('logprobs') and response_data[
-            'logprobs'].get('content') is not None else 0.81
-        return response_data["message"]["content"], confidence
+        # confidence = float(response_data['logprobs']['content']) if response_data.get('logprobs') and response_data[
+        #     'logprobs'].get('content') is not None else 0.81
+        return response_data["message"]["content"]
 
     def close_session(self):
         if self.session:
@@ -51,4 +51,4 @@ class OllamaModel(BaseModelClient):
 
     def init_model(self):
         logging.info("Initializing Ollama model")
-        self.complete(["Hi"])
+        self.complete([{"role": "user", "content": "Hi"}])

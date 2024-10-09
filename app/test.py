@@ -29,9 +29,9 @@ def process_eml_files():
             raw_emails = [email_message.as_bytes()]
             emails = email_responder.email_processor.process_raw_emails(raw_emails)
             for email in emails:
-                classification, confidence = email_responder.email_classifier.classify(email)
+                classification, language, study_program = email_responder.email_classifier.classify(email)
                 # classification1, confidence1 = email_responder.study_program_classifier.classify(email)
-                if classification.strip().lower() == "non-sensitive" and confidence > 0.8:
+                if classification.strip().lower() == "non-sensitive":
                     non_sensitive.append(email.subject)
                 else:
                     sensitive.append(email.subject)
