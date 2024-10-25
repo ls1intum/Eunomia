@@ -1,7 +1,7 @@
 services:
   eunomnia-app:
     container_name: eunomnia-app
-    image: "ghcr.io/ls1intum/eunomnia:latest"
+    image: "ghcr.io/ls1intum/eunomnia-app:latest"
     ports:
       - "8082:8082"
     restart: unless-stopped

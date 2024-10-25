@@ -32,7 +32,7 @@ jobs:
           platforms: amd64, arm64
           file: ./Dockerfile
           context: .
-          tags: ghcr.io/ls1intum/eunomnia:latest
+          tags: ghcr.io/ls1intum/eunomnia-app:latest
           push: true
 
   deploy:
