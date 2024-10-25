@@ -4,6 +4,6 @@ COPY . /app
 COPY requirements.txt .
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
-COPY app/ ./app
+COPY app/* .
 EXPOSE 8082
 CMD ["python", "main.py"]
