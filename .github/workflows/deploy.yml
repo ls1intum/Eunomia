@@ -3,7 +3,7 @@ name: Deploy Eunomnia
 on:
   push:
     branches:
-      - release
+      - main
 
 jobs:
   build:

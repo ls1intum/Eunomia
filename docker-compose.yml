@@ -1,4 +1,3 @@
-version: '3'
 services:
   eunomnia-app:
     container_name: eunomnia-app
