@@ -1,10 +1,8 @@
-import logging
 import os
 
 from dotenv import load_dotenv
 
 if os.getenv("ENVIRONMENT") == "development":
-    logging.info("development env")
     load_dotenv("./../development.env")
 
 

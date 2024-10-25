@@ -85,8 +85,6 @@ jobs:
             echo "ANGELOS_URI=${{ vars.ANGELOS_URI }}" >> /home/${{ vars.VM_USERNAME }}/${{ github.repository }}/.env.prod
             echo "ANGELOS_PORT=${{ vars.ANGELOS_PORT }}" >> /home/${{ vars.VM_USERNAME }}/${{ github.repository }}/.env.prod
             echo "OPENAI_MODEL=${{ vars.OPENAI_MODEL }}" >> /home/${{ vars.VM_USERNAME }}/${{ github.repository }}/.env.prod
-            echo "AZURE_DEPLOYMENT=${{ vars.AZURE_DEPLOYMENT }}" >> /home/${{ vars.VM_USERNAME }}/${{ github.repository }}/.env.prod
-            echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> /home/${{ vars.VM_USERNAME }}/${{ github.repository }}/.env.prod
 
 
       - name: SSH to VM and Execute Docker-Compose Up
