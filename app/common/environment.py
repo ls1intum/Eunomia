@@ -2,17 +2,16 @@ import os
 
 from dotenv import load_dotenv
 
-if os.getenv("ENVIRONMENT") == "development":
-    load_dotenv("./../development.env")
+load_dotenv("./../development.env")
 
 
 class Config:
     USE_OPENAI = os.getenv("USE_OPENAI", "false")
-    OLLAMA_MODEL = os.getenv("OLLAMA_MODEL")
     OPENAI_MODEL = os.getenv("OPENAI_MODEL")
     API_KEY = os.getenv("LLAMA_MODEL_TOKEN")
     URL = os.getenv("LLAMA_MODEL_URI")
 
+    OLLAMA_MODEL = os.getenv("GPU_MODEL")
     OLLAMA_URL = os.getenv("GPU_URL")
     GPU_USER = os.getenv("GPU_USER")
     GPU_PASSWORD = os.getenv("GPU_PASSWORD")

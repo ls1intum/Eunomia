@@ -13,4 +13,4 @@ def get_model_client() -> BaseModelClient:
             raise ValueError("OpenAI API key must be provided when use_openai is True")
         return OpenAIModel(model=config.OPENAI_MODEL, api_key=config.API_KEY, url=config.OPENAI_API_URL)
     else:
-        return OllamaModel(config.OLLAMA_MODEL, config.OLLAMA_URL)
+        return OllamaModel(model=config.OLLAMA_MODEL, url=config.OLLAMA_URL)

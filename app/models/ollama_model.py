@@ -1,7 +1,8 @@
 import logging
-from typing import Dict
+from typing import Dict, Any, Optional
 
 import requests
+from pydantic import ConfigDict
 
 from app.common.environment import config
 from app.models.base_model import BaseModelClient
@@ -18,16 +19,17 @@ def create_auth_header() -> Dict[str, str]:
 
 
 class OllamaModel(BaseModelClient):
-    def __init__(self, model: str, url: str):
-        super().__init__(model)
-        logging.info("Initializing OllamaModel")
-        self.url = url
-        self.headers = create_auth_header()
-        self.init_session()
-        self.init_model()
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+    model_initialized: bool = False;
+    url: str
+    headers: Optional[Dict[str, str]] = None
+    session: requests.Session = None
 
-    def init_session(self):
+    def model_post_init(self, __context: Any) -> None:
+        logging.info("Initializing OllamaModel")
         self.session = requests.Session()
+        self.headers = create_auth_header()
+        self.init_model()
 
     def complete(self, prompt: []) -> (str, float):
         response = self.session.post(
@@ -50,9 +52,8 @@ class OllamaModel(BaseModelClient):
             self.session.close()
 
     def init_model(self):
-        logging.info("Initializing Ollama model")
-        response = self.session.get(
-            f"{self.url}tags",
-            headers=self.headers
-        )
-        response.raise_for_status()
+        if not self.model_initialized:
+            logging.info("Initializing Ollama model")
+            self.complete([{"role": "user", "content": "Hi"}])
+            self.model_initialized = True
+            logging.info("Initialized Ollama model")

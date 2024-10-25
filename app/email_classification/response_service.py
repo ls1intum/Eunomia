@@ -7,7 +7,6 @@ from app.common.environment import config
 
 class ResponseService:
     def __init__(self):
-        self.angelos_api_key = config.ANGELOS_API_KEY
         self.angelos_url = config.ANGELOS_URI
         self.port = config.ANGELOS_PORT
         self.api_url = f"{self.angelos_url}:{self.port}/api/v1/question/ask"
