@@ -12,8 +12,8 @@ class Config:
     API_KEY = os.getenv("LLAMA_MODEL_TOKEN")
     URL = os.getenv("LLAMA_MODEL_URI")
 
-    OLLAMA_MODEL = os.getenv("GPU_MODEL")
-    OLLAMA_URL = os.getenv("GPU_URL")
+    GPU_MODEL = os.getenv("GPU_MODEL")
+    GPU_URL = os.getenv("GPU_URL")
     GPU_USER = os.getenv("GPU_USER")
     GPU_PASSWORD = os.getenv("GPU_PASSWORD")
     GPU_HOST = os.getenv("GPU_HOST")
