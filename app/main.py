@@ -1,15 +1,9 @@
 import logging
-import os
 import time
 import traceback
 
-from dotenv import load_dotenv
-
 from app.common.logging_config import setup_logging
 from app.email_responder.email_responder import EmailResponder
-
-if os.getenv("ENVIRONMENT") == "development":
-    load_dotenv("./../development.env")
 
 
 def main():
