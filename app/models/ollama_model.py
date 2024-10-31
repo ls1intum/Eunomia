@@ -41,7 +41,8 @@ class OllamaModel(BaseModelClient):
             response = self.session.post(
                 f"{self.url}chat",
                 json={"model": self.model, "messages": prompt, "stream": False,
-                      "options": {"logprobs": True, "temperature": 0.3}},
+                      "options": {"temperature": 0.2, "max_tokens": 128}, "format": "json"},
+
                 headers=self.headers,
                 timeout=10  # Set timeout in seconds
             )
@@ -64,19 +65,17 @@ class OllamaModel(BaseModelClient):
         except ValueError as json_err:
             logging.error(f"JSON decoding failed: {json_err}")
             return None, 0.0  # Handle JSON decoding errors gracefully
-        
-        confidence = float(response_data.get('logprobs', {}).get('content', 0.81))
+
         message_content = response_data.get("message", {}).get("content")
 
         if message_content is None:
             logging.warning("Message content is missing in the response")
-            return None, confidence  # Return default confidence if content is missing
+            return None  # Return default confidence if content is missing
 
         logging.info(f"Received prompt: {prompt}")
-        return message_content, confidence
+        return message_content
 
     def close_session(self):
-        # Close the session when done
         if self.session:
             self.session.close()
 
