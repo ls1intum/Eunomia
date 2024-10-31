@@ -19,11 +19,12 @@ def create_auth_header() -> Dict[str, str]:
 
 
 class OllamaModel(BaseModelClient):
-    model_config = ConfigDict(arbitrary_types_allowed=True)
-    model_initialized: bool = False;
     url: str
     headers: Optional[Dict[str, str]] = None
     session: requests.Session = None
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+    model_initialized: bool = False
 
     def model_post_init(self, __context: Any) -> None:
         logging.info("Initializing OllamaModel")
