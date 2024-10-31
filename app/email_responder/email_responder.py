@@ -34,8 +34,11 @@ class EmailResponder:
                 raw_emails = self.email_fetcher.fetch_raw_emails()
                 emails = self.email_processor.process_raw_emails(raw_emails)
                 for email in emails:
-                    classification, language, study_program = self.classify_with_retries(email)
-                    self.handle_classification(email, classification, study_program, language)
+                    if email.in_reply_to is None:
+                        classification, language, study_program = self.classify_with_retries(email)
+                        self.handle_classification(email, classification, study_program, language)
+                    else:
+                        self.email_client.flag_email(email.message_id)
                 logging.info("Sleeping for 60 seconds before next fetch")
                 time.sleep(60)
         except Exception as e:
@@ -61,8 +64,7 @@ class EmailResponder:
             self.email_sender.send_reply_email(original_email=email, reply_body=response_content['answer'])
         else:
             logging.info("No proper answer can be found or it is classified as sensitive")
-            uuid = self.email_client.search_by_message_id(email.message_id)
-            self.email_client.flag_email(uuid)
+            self.email_client.flag_email(email.message_id)
 
     def classify_with_retries(self, email):
         """Attempts to classify an email with retries."""

@@ -14,7 +14,8 @@ class EmailFetcher:
         connection = self.email_client.get_imap_connection()
 
         connection.select(folder)
-        status, messages = connection.search(None, InboxType.Unseen.value)
+        status, messages = connection.search(None, InboxType.Unseen.value, InboxType.Unflagged.value)
+
         email_ids = messages[0].split()
 
         raw_emails = []
