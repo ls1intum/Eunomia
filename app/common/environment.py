@@ -2,7 +2,8 @@ import os
 
 from dotenv import load_dotenv
 
-load_dotenv("./../development.env")
+if os.getenv("ENVIRONMENT") == "development":
+    load_dotenv("./../development.env")
 
 
 class Config:
@@ -27,17 +28,17 @@ class Config:
 
     # test
     TEST_EML_PATH = os.getenv("TEST_EML_PATH")
-    STUDY_PROGRAMS_FOLDER = os.getenv("STUDY_PROGRAMS_FOLDER")
 
     # angelos
     ANGELOS_URI = os.getenv("ANGELOS_URI")
     ANGELOS_PORT = os.getenv("ANGELOS_PORT")
-    ANGELOS_API_KEY = os.getenv("ANGELOS_API_KEY")
 
     # openai
     OPENAI_MODEL = os.getenv("OPENAI_MODEL")
     AZURE_DEPLOYMENT = os.getenv("OPENAI_MODEL_DEPLOYMENT")
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+    STUDY_PROGRAMS_FOLDER = os.getenv("STUDY_PROGRAMS_FOLDER")
 
 
 config = Config()

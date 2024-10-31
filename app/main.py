@@ -1,11 +1,9 @@
 import logging
+import time
 import traceback
 
-from dotenv import load_dotenv
-from app.email_responder.email_responder import EmailResponder
 from app.common.logging_config import setup_logging
-
-load_dotenv("./../development.env")
+from app.email_responder.email_responder import EmailResponder
 
 
 def main():
@@ -18,9 +16,15 @@ def main():
         tb = traceback.format_exc()
         logging.error("An error occurred: %s", e)
         logging.error("Traceback:\n%s", tb)
+        raise
     finally:
         logging.info("Application finished")
 
 
 if __name__ == "__main__":
-    main()
+    while True:
+        try:
+            main()
+        except Exception:
+            logging.info("Restarting application after an exception...")
+            time.sleep(5)
