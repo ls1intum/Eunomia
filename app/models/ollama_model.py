@@ -3,6 +3,7 @@ from typing import Dict, Any, Optional
 
 import requests
 from pydantic import ConfigDict
+from requests import Timeout, HTTPError, RequestException
 
 from app.common.environment import config
 from app.models.base_model import BaseModelClient
@@ -32,21 +33,47 @@ class OllamaModel(BaseModelClient):
         self.headers = create_auth_header()
         self.init_model()
 
-    def complete(self, prompt: []) -> (str, float):
-        logging.info("requesting")
-        response = self.session.post(
-            f"{self.url}chat",
-            json={"model": self.model, "messages": prompt, "stream": False,
-                  "options": {"logprobs": True, "temperature": 0.3}},
-            headers=self.headers
-        )
-        response_data = response.json()
-        logging.info(f"Got response for model {self.model}: {response_data}")
-        response.raise_for_status()
-        logging.info(f"Got prompt: {prompt}")
-        confidence = float(response_data['logprobs']['content']) if response_data.get('logprobs') and response_data[
-            'logprobs'].get('content') is not None else 0.81
-        return response_data["message"]["content"], confidence
+    def complete(self, prompt: list) -> (str, float):
+        logging.info("Requesting model response")
+
+        try:
+            # Making the request with a timeout
+            response = self.session.post(
+                f"{self.url}chat",
+                json={"model": self.model, "messages": prompt, "stream": False,
+                      "options": {"logprobs": True, "temperature": 0.3}},
+                headers=self.headers,
+                timeout=10  # Set timeout in seconds
+            )
+            response.raise_for_status()
+
+        except Timeout:
+            logging.error("Request timed out")
+            return None, 0.0  # Handle timeout gracefully
+
+        except HTTPError as http_err:
+            logging.error(f"HTTP error occurred: {http_err}")
+            return None, 0.0  # Handle HTTP errors gracefully
+
+        except RequestException as req_err:
+            logging.error(f"Error during request: {req_err}")
+            return None, 0.0  # Handle other request-related issues gracefully
+        try:
+            response_data = response.json()
+            logging.info(f"Got response for model {self.model}: {response_data}")
+        except ValueError as json_err:
+            logging.error(f"JSON decoding failed: {json_err}")
+            return None, 0.0  # Handle JSON decoding errors gracefully
+        
+        confidence = float(response_data.get('logprobs', {}).get('content', 0.81))
+        message_content = response_data.get("message", {}).get("content")
+
+        if message_content is None:
+            logging.warning("Message content is missing in the response")
+            return None, confidence  # Return default confidence if content is missing
+
+        logging.info(f"Received prompt: {prompt}")
+        return message_content, confidence
 
     def close_session(self):
         # Close the session when done
