@@ -34,7 +34,7 @@ class EmailResponder:
                 raw_emails = self.email_fetcher.fetch_raw_emails()
                 emails = self.email_processor.process_raw_emails(raw_emails)
                 for email in emails:
-                    if email.in_reply_to is None:
+                    if email.in_reply_to is None and len(email.references) == 0 and email.spam == "NO":
                         classification, language, study_program = self.classify_with_retries(email)
                         self.handle_classification(email, classification, study_program, language)
                     else:
@@ -58,8 +58,9 @@ class EmailResponder:
                 "study_program": study_program,
                 "language": language,
             }
-            response_content = self.response_service.get_response(payload)
+            # response_content = self.response_service.get_response(payload)
             logging.info("api call to angelos was made")
+            response_content = {'answer': "Hallo kollege, hier haste deine antwort"}
         if response_content:
             self.email_sender.send_reply_email(original_email=email, reply_body=response_content['answer'])
         else:
