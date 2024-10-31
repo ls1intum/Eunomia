@@ -33,10 +33,11 @@ class OllamaModel(BaseModelClient):
         self.init_model()
 
     def complete(self, prompt: []) -> (str, float):
+        logging.info("requesting")
         response = self.session.post(
             f"{self.url}chat",
             json={"model": self.model, "messages": prompt, "stream": False,
-                  "options": {"logprobs": True, "temperature": 0.5}},
+                  "options": {"logprobs": True, "temperature": 0.3}},
             headers=self.headers
         )
         response_data = response.json()
