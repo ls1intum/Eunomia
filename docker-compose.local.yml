@@ -1,0 +1,7 @@
+services:
+  eunomnia-app:
+    container_name: eunomnia-app
+    build: .
+    env_file:
+      - development.env
+    restart: always

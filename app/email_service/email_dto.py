@@ -27,6 +27,8 @@ class EmailDTO:
     date: Optional[str] = None
     to: Optional[str] = None
     in_reply_to: Optional[str] = None
+    references: List[str] = field(default_factory=list)
+    spam: Optional[str] = None
     body: Optional[str] = None
     sensitive: Optional[bool] = True
 
@@ -48,6 +50,8 @@ class EmailDTO:
             "date": headers.get("Date", [None])[0],
             "to": headers.get("To", [None])[0],
             "in_reply_to": headers.get("In-Reply-To", [None])[0],
+            "references": headers.get("References", []),
+            "spam": headers.get("X-Spam-Flag", [None])[0],
 
         }
         return cls(**email_data)
