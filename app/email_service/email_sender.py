@@ -19,7 +19,7 @@ class EmailSender:
         to_address = self.email_client.username
         subject = "Re: " + original_email.subject
         message_id = original_email.message_id
-        references = original_email.message_id
+        references = original_email.references
 
         # Create the reply email
         msg = MIMEMultipart()

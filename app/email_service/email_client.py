@@ -77,11 +77,16 @@ class EmailClient:
             logging.error(f"Search failed for Message-ID: {message_id}")
             return None
 
-    def flag_email(self, email_uid):
+    def flag_email(self, message_id):
+        email_uid = self.search_by_message_id(message_id)
         if email_uid:
-            result, response = self.imap_connection.uid('STORE', email_uid, '+FLAGS', '(\Flagged)')
+            # Set both \Flagged and \Unseen flags
+            result, response = self.imap_connection.uid('STORE', email_uid, '+FLAGS', '(\Flagged \Seen)')
+
             if result == 'OK':
-                logging.info(f"Email with UID {email_uid} has been successfully flagged.")
+                # Now remove the \Seen flag to keep it unread
+                self.imap_connection.uid('STORE', email_uid, '-FLAGS', '(\Seen)')
+                logging.info(f"Email with UID {email_uid} has been successfully flagged and set to unread.")
             else:
                 logging.error(f"Failed to flag the email with UID {email_uid}.")
         else:
