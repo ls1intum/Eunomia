@@ -23,6 +23,7 @@ services:
       - ANGELOS_PORT
       - OPENAI_MODEL
       - STUDY_PROGRAMS_FOLDER
+      - ANGELOS_APP_API_KEY
     networks:
       - angelos-network
 

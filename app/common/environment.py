@@ -40,5 +40,7 @@ class Config:
 
     STUDY_PROGRAMS_FOLDER = os.getenv("STUDY_PROGRAMS_FOLDER")
 
+    ANGELOS_APP_API_KEY = os.getenv("ANGELOS_APP_API_KEY")
+
 
 config = Config()
