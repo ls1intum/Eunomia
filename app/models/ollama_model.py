@@ -33,7 +33,7 @@ class OllamaModel(BaseModelClient):
         self.headers = create_auth_header()
         self.init_model()
 
-    def complete(self, prompt: list) -> (str, float):
+    def complete(self, prompt: list) -> str:
         logging.info("Requesting model response")
 
         try:
@@ -50,27 +50,27 @@ class OllamaModel(BaseModelClient):
 
         except Timeout:
             logging.error("Request timed out")
-            return None, 0.0  # Handle timeout gracefully
+            return None
 
         except HTTPError as http_err:
             logging.error(f"HTTP error occurred: {http_err}")
-            return None, 0.0  # Handle HTTP errors gracefully
+            return None
 
         except RequestException as req_err:
             logging.error(f"Error during request: {req_err}")
-            return None, 0.0  # Handle other request-related issues gracefully
+            return None
         try:
             response_data = response.json()
             logging.info(f"Got response for model {self.model}: {response_data}")
         except ValueError as json_err:
             logging.error(f"JSON decoding failed: {json_err}")
-            return None, 0.0  # Handle JSON decoding errors gracefully
+            return None
 
         message_content = response_data.get("message", {}).get("content")
 
         if message_content is None:
             logging.warning("Message content is missing in the response")
-            return None  # Return default confidence if content is missing
+            return None
 
         logging.info(f"Received prompt: {prompt}")
         return message_content

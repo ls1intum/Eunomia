@@ -58,9 +58,9 @@ class EmailResponder:
                 "study_program": study_program,
                 "language": language,
             }
-            # response_content = self.response_service.get_response(payload)
-            logging.info("api call to angelos was made")
-            response_content = {'answer': "Hallo kollege, hier haste deine antwort"}
+            response_content = self.response_service.get_response(payload)
+            # logging.info("api call to angelos was made")
+            # response_content = {'answer': "Hallo kollege, hier haste deine antwort"}
         if response_content:
             self.email_sender.send_reply_email(original_email=email, reply_body=response_content['answer'])
         else:
