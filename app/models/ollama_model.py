@@ -44,7 +44,6 @@ class OllamaModel(BaseModelClient):
                       "options": {"temperature": 0.2, "max_tokens": 128}, "format": "json"},
 
                 headers=self.headers,
-                timeout=10  # Set timeout in seconds
             )
             response.raise_for_status()
 

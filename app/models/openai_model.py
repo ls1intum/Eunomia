@@ -20,7 +20,7 @@ class OpenAIModel(BaseModelClient):
             model=self.model,
             logprobs=True
         )
-        logging.info(f"Got prompt: {prompt}")
+        # logging.info(f"Got prompt: {prompt}")
         logging.info(f"Got response for model {self.model}: {response}")
         # confidence = float(response['logprobs']['content']) if response.get('logprobs') and response['logprobs'].get(
         #     'content') is not None else 0.81

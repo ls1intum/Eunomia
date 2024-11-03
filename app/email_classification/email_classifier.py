@@ -31,7 +31,7 @@ class EmailClassifier(Classifier):
         language = parsed_result.get("language", "").lower()
         study_program = parsed_result.get("study_program", "").lower()
         # confidence = int(result.get("confidence", "0%").strip("%"))
-        # logging.info(f"classification: {classification}, confidence: {confidence}")
+        logging.info(f"Classified as: {classification}, language: {language}, study_program: {study_program}")
         return classification, language, study_program
 
     @staticmethod
