@@ -19,7 +19,6 @@ class EmailSender:
         to_address = self.email_client.username
         subject = "Re: " + original_email.subject
         message_id = original_email.message_id
-        references = original_email.references
 
         # Create the reply email
         msg = MIMEMultipart()
@@ -27,8 +26,7 @@ class EmailSender:
         msg['To'] = from_address
         msg['Subject'] = subject
         msg['In-Reply-To'] = message_id
-        msg['References'] = references
-
+        msg['References'] = message_id
         # Attach the reply body
         msg.attach(MIMEText(reply_body, 'plain'))
 
@@ -37,4 +35,5 @@ class EmailSender:
             logging.info("Reply email sent to %s", from_address)
         except smtplib.SMTPException as e:
             logging.error("Failed to send reply email: %s", e)
+            self.email_client.flag_email(original_email.message_id)
             raise
