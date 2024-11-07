@@ -34,7 +34,8 @@ class EmailResponder:
                 raw_emails = self.email_fetcher.fetch_raw_emails()
                 emails = self.email_processor.process_raw_emails(raw_emails)
                 for email in emails:
-                    if email.in_reply_to is None and len(email.references) == 0 and email.spam == "NO":
+                    if email.in_reply_to is None and len(email.references) == 0 and (
+                            email.spam == "NO" or email.spam is None):
                         classification, language, study_program = self.classify_with_retries(email)
                         self.handle_classification(email, classification, study_program, language)
                     else:

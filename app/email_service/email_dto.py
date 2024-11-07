@@ -34,25 +34,24 @@ class EmailDTO:
 
     @classmethod
     def from_email_message(cls, msg: Message):
-        headers = {key: msg.get_all(key) for key in msg.keys()}
+        headers = {key.lower(): msg.get_all(key) for key in msg.keys()}
 
         email_data = {
-            "delivered_to": headers.get("Delivered-To", [None])[0],
-            "received_by": headers.get("Received", []),
-            "received_date_time": headers.get("Received", []),
-            "return_path": headers.get("Return-Path", [None])[0],
-            "from_address": headers.get("From", [None])[0],
+            "delivered_to": headers.get("delivered-to", [None])[0],
+            "received_by": headers.get("received", []),
+            "received_date_time": headers.get("received", []),
+            "return_path": headers.get("return-path", [None])[0],
+            "from_address": headers.get("from", [None])[0],
             "content_type": msg.get_content_type(),
             "charset": msg.get_content_charset(),
-            "content_transfer_encoding": headers.get("Content-Transfer-Encoding", [None])[0],
-            "subject": cls.decode_email_subject(headers.get("Subject", [None])[0]),
-            "message_id": headers.get("Message-Id", [None])[0],
-            "date": headers.get("Date", [None])[0],
-            "to": headers.get("To", [None])[0],
-            "in_reply_to": headers.get("In-Reply-To", [None])[0],
-            "references": headers.get("References", []),
-            "spam": headers.get("X-Spam-Flag", [None])[0],
-
+            "content_transfer_encoding": headers.get("content-transfer-encoding", [None])[0],
+            "subject": cls.decode_email_subject(headers.get("subject", [None])[0]),
+            "message_id": headers.get("message-id", [None])[0],
+            "date": headers.get("date", [None])[0],
+            "to": headers.get("to", [None])[0],
+            "in_reply_to": headers.get("in-reply-to", [None])[0],
+            "references": headers.get("references", []),
+            "spam": headers.get("x-spam-flag", [None])[0],
         }
         return cls(**email_data)
 
