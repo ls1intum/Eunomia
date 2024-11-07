@@ -15,7 +15,7 @@ class ResponseService:
         self.api_key = config.ANGELOS_APP_API_KEY
         self._set_authorization_header()
 
-    def _set_authorization_header(self, token):
+    def _set_authorization_header(self):
         """Helper function to set the authorization header."""
         self.headers = {"x-api-key": self.api_key, "Content-Type": "application/json"}
 
