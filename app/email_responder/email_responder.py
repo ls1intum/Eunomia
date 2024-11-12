@@ -55,21 +55,25 @@ class EmailResponder:
 
     def handle_classification(self, email, classification, study_program, language):
         # response_content = self.generate_email_response(email, classification)
-        response_content = None
-        if classification.strip().lower() == "non-sensitive":
-            logging.info("should get a response now ")
-            payload = {
-                "message": email.body,
-                "study_program": study_program,
-                "language": language,
-            }
-            response_content = self.response_service.get_response(payload)
-            # logging.info("api call to angelos was made")
-            # response_content = {'answer': "Hallo kollege, hier haste deine antwort"}
-        if response_content:
-            self.email_sender.send_reply_email(original_email=email, reply_body=response_content['answer'])
-        else:
-            logging.info("No proper answer can be found or it is classified as sensitive")
+        try:
+            response_content = None
+            if classification.strip().lower() == "non-sensitive":
+                logging.info("should get a response now ")
+                payload = {
+                    "message": email.body,
+                    "study_program": study_program,
+                    "language": language,
+                }
+                response_content = self.response_service.get_response(payload)
+                # logging.info("api call to angelos was made")
+                # response_content = {'answer': "Hallo kollege, hier haste deine antwort"}
+            if response_content:
+                self.email_sender.send_reply_email(original_email=email, reply_body=response_content['answer'])
+            else:
+                logging.info("No proper answer can be found or it is classified as sensitive")
+                self.email_client.flag_email(email.message_id)
+        except Exception as e:
+            logging.error("Failed to send email response: %s", e)
             self.email_client.flag_email(email.message_id)
 
     def classify_with_retries(self, email):

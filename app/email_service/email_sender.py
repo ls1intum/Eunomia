@@ -1,5 +1,4 @@
 import logging
-import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
@@ -30,10 +29,5 @@ class EmailSender:
         # Attach the reply body
         msg.attach(MIMEText(reply_body, 'plain'))
 
-        try:
-            self.email_client.smtp_connection.send_message(msg)
-            logging.info("Reply email sent to %s", from_address)
-        except smtplib.SMTPException as e:
-            logging.error("Failed to send reply email: %s", e)
-            self.email_client.flag_email(original_email.message_id)
-            raise
+        self.email_client.smtp_connection.send_message(msg)
+        logging.info("Reply email sent to %s", from_address)
