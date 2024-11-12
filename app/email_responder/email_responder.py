@@ -32,6 +32,10 @@ class EmailResponder:
             while True:
                 logging.info("Fetching new emails...")
                 raw_emails = self.email_fetcher.fetch_raw_emails()
+                if not raw_emails:
+                    logging.info("No new emails. Sleeping briefly before next check.")
+                    time.sleep(30)
+                    continue
                 emails = self.email_processor.process_raw_emails(raw_emails)
                 for email in emails:
                     if email.in_reply_to is None and len(email.references) == 0 and (
