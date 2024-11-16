@@ -1,3 +1,10 @@
+Bachelor Bioinformatik
+Bachelor Elektrotechnik Informationstechnik
+Bachelor Informatik
+Bachelor Informatik Games Engineering
+Bachelor Information Engineering
+Bachelor Mathematik
+Bachelor Wirtschaftsinformatik
 Master Bioinformatik
 Master Biomedical Computing
 Master Communications Electronics Engineering
@@ -16,10 +23,3 @@ Master Mathematik
 Master Robotics Cognition Intelligence
 Neuroengineering
 TopMath
-Bachelor Bioinformatik
-Bachelor Elektrotechnik Informationstechnik
-Bachelor Informatik
-Bachelor Informatik Games Engineering
-Bachelor Information Engineering
-Bachelor Mathematik
-Bachelor Wirtschaftsinformatik
