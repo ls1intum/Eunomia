@@ -73,36 +73,3 @@ class EmailClient:
     def connect(self):
         self.connect_imap()
         self.connect_smtp()
-
-    def search_by_message_id(self, message_id):
-        self.imap_connection.select('inbox')
-        logging.info(f"Searching for message with ID: {message_id}...")
-
-        result, data = self.imap_connection.search(None, f'(HEADER Message-ID "{message_id}")')
-
-        if result == 'OK':
-            email_uids = data[0].split()
-            if email_uids:
-                logging.info(f"Found email with UID: {email_uids[-1]}")
-                return email_uids[-1]
-            else:
-                logging.warning(f"No email found with Message-ID: {message_id}")
-                return None
-        else:
-            logging.error(f"Search failed for Message-ID: {message_id}")
-            return None
-
-    def flag_email(self, message_id):
-        email_uid = self.search_by_message_id(message_id)
-        if email_uid:
-            # Set both \Flagged and \Unseen flags
-            result, response = self.imap_connection.uid('STORE', email_uid, '+FLAGS', '(\Flagged \Seen)')
-
-            if result == 'OK':
-                # Now remove the \Seen flag to keep it unread
-                self.imap_connection.uid('STORE', email_uid, '-FLAGS', '(\Seen)')
-                logging.info(f"Email with UID {email_uid} has been successfully flagged and set to unread.")
-            else:
-                logging.error(f"Failed to flag the email with UID {email_uid}.")
-        else:
-            logging.error("Invalid UID. No email to flag.")
