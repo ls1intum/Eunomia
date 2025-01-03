@@ -1,30 +1,26 @@
 import logging
-import time
-import traceback
+from fastapi import FastAPI
 
+from app.routers.mail_router import router as mail_router
 from app.common.logging_config import setup_logging
-from app.email_responder.email_responder import EmailResponder
+from app.managers.thread_manager import ThreadManager
 
+app = FastAPI()
+thread_manager = ThreadManager()
 
-def main():
-    setup_logging()
-    logging.info("Application started")
-    try:
-        email_responder = EmailResponder()
-        email_responder.start()
-    except Exception as e:
-        tb = traceback.format_exc()
-        logging.error("An error occurred: %s", e)
-        logging.error("Traceback:\n%s", tb)
-        raise
-    finally:
-        logging.info("Application finished")
+setup_logging()
 
+@app.on_event("startup")
+async def startup_event():
+    logging.info("FastAPI application startup...")
 
-if __name__ == "__main__":
-    while True:
-        try:
-            main()
-        except Exception:
-            logging.info("Restarting application after an exception...")
-            time.sleep(5)
+@app.on_event("shutdown")
+def shutdown_event():
+    """
+    Gracefully stop all threads on shutdown.
+    """
+    logging.info("FastAPI application shutting down...")
+    thread_manager.stop_all()
+
+# Include the router that handles mail endpoints
+app.include_router(mail_router, prefix="/api/mail", tags=["mail"])

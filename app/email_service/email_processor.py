@@ -6,9 +6,9 @@ from app.email_service.email_dto import EmailDTO
 
 
 class EmailProcessor:
-
     def __init__(self):
         logging.info("EmailProcessor initialized")
+    
     @staticmethod
     def decode_header(header_value):
         decoded_bytes, charset = decode_header(header_value)[0]

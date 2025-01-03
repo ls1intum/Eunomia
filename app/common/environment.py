@@ -8,8 +8,6 @@ if os.getenv("ENVIRONMENT") == "development":
 
 class Config:
     # email
-    EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
-    EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
     IMAP_SERVER = os.getenv("IMAP_SERVER")
     SMTP_SERVER = os.getenv("SMTP_SERVER")
     IMAP_PORT = os.getenv("IMAP_PORT")
@@ -30,17 +28,15 @@ class Config:
     TEST_EML_PATH = os.getenv("TEST_EML_PATH")
 
     # angelos
-    ANGELOS_URI = os.getenv("ANGELOS_URI")
-    ANGELOS_PORT = os.getenv("ANGELOS_PORT")
+    ANGELOS_URL = os.getenv("ANGELOS_URL")
+    ANGELOS_APP_API_KEY = os.getenv("ANGELOS_APP_API_KEY")
 
     # openai
     OPENAI_MODEL = os.getenv("OPENAI_MODEL")
-    AZURE_DEPLOYMENT = os.getenv("OPENAI_MODEL_DEPLOYMENT")
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+    AZURE_ENDPOINT = os.getenv("OPENAI_ENDPOINT")
+    AZURE_VERSION = os.getenv("OPENAI_VERSION")
 
-    STUDY_PROGRAMS_FOLDER = os.getenv("STUDY_PROGRAMS_FOLDER")
-
-    ANGELOS_APP_API_KEY = os.getenv("ANGELOS_APP_API_KEY")
 
 
 config = Config()
