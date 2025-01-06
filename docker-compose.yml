@@ -5,6 +5,9 @@ services:
     restart: unless-stopped
     volumes:
       - ./knowledge:/app/knowledge
+    # Map port 8082 if you want external access
+    ports:
+      - "8082:8082"
     environment:
       - EMAIL_ADDRESS
       - EMAIL_PASSWORD
@@ -22,11 +25,9 @@ services:
       - ANGELOS_URI
       - ANGELOS_PORT
       - OPENAI_MODEL
-      - STUDY_PROGRAMS_FOLDER
       - ANGELOS_APP_API_KEY
     networks:
       - angelos-network
-
 
 networks:
   angelos-network:
