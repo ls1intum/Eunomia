@@ -1,4 +1,3 @@
-# app/managers/thread_manager.py
 import threading
 import logging
 from typing import Dict, Tuple, List
