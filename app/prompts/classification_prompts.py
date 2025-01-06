@@ -9,7 +9,12 @@ def generate_classification_prompt(subject, body, study_programs):
                 "2. The language of the email. Either 'german' or 'english'. If it is a different language, default to 'english'.\n"
                 "3. Whether the email mentions any of the following study programs: "
                 f"{study_programs}.\nIdentify the study program from the given information. If the specific program of the student is mentioned, provide its name; if none is specified, respond with ‘general’. In cases where the email concerns switching study programs or transferring from a Bachelor’s to a Master’s program, provide the name of the program the student intends to switch to."
-                "Only provide the classification, language, and study_program in JSON format."
+                "Output strictly as a JSON object in the following format, without any additional text.:\n"
+                "{\n"
+                '  "classification": "<sensitive or non-sensitive>",\n'
+                '  "language": "<german or english>",\n'
+                '  "study_program": "<specific program name or general>"\n'
+                "}"
             )
         },
         {

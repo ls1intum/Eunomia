@@ -2,6 +2,8 @@ import json
 import logging
 import os
 
+from typing import List
+
 from app.common.environment import config
 from app.common.text_cleaner import TextCleaner
 from app.email_classification.classifier import Classifier
@@ -11,18 +13,34 @@ from app.prompts.classification_prompts import generate_classification_prompt
 
 
 class EmailClassifier(Classifier):
-    def __init__(self, model: BaseModelClient):
+    def __init__(self, model: BaseModelClient, study_programs: List[str] = None):
+        """
+        :param model: LLM or classification model
+        :param study_programs: A list of study programs for a given organization
+        """
         super().__init__(model)
+        self.study_programs = study_programs or []
+        logging.info(f"EmailClassifier initialized with {len(self.study_programs)} study programs.")
 
     def classify(self, email: EmailDTO):
+        """
+        Uses the LLM to classify an email into:
+        1) non-sensitive / sensitive
+        2) language
+        3) matched study program (from self.study_programs)
+        """
         logging.info("Classifying email...")
         cleansed_text = TextCleaner.cleanse_text(email.body)
-        study_programs = self.get_study_programs()
-        prompt = generate_classification_prompt(body=cleansed_text, subject=email.subject,
-                                                study_programs=study_programs)
+        study_programs_str = ", ".join(self.study_programs)
+        
+        # Generate a prompt that includes these study programs
+        prompt = generate_classification_prompt(
+            body=cleansed_text, 
+            subject=email.subject,
+            study_programs=study_programs_str
+        )
         result = self.request_llm(prompt)
         return self.parse_classification_result(result)
-        # return result
 
     @staticmethod
     def parse_classification_result(result):
@@ -33,22 +51,3 @@ class EmailClassifier(Classifier):
         # confidence = int(result.get("confidence", "0%").strip("%"))
         logging.info(f"Classified as: {classification}, language: {language}, study_program: {study_program}")
         return classification, language, study_program
-
-    @staticmethod
-    def get_study_programs():
-        base_folder = config.STUDY_PROGRAMS_FOLDER
-        study_programs_file = os.path.join(base_folder, "study_programs.txt")
-        study_programs = EmailClassifier.load_study_programs(study_programs_file)
-        study_programs_str = ", ".join(study_programs)
-        return study_programs_str
-
-    @staticmethod
-    def load_study_programs(file_path):
-        """
-        Load the study programs from study_programs.txt.
-        """
-        if not os.path.exists(file_path):
-            raise FileNotFoundError(f"Study programs file not found at {file_path}")
-        with open(file_path, 'r') as f:
-            study_programs = [line.strip() for line in f.readlines() if line.strip()]
-        return study_programs

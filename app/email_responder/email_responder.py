@@ -1,6 +1,9 @@
 import logging
 import time
 import traceback
+import threading
+
+from typing import List
 
 from app.email_classification.email_classifier import EmailClassifier
 from app.email_responder.response_service import ResponseService
@@ -11,27 +14,63 @@ from app.models.model_loader import get_model_client
 
 
 class EmailResponder:
-    def __init__(self):
-        self.email_client = EmailClient()
+    def __init__(self, mail_account: str, mail_password: str, org_id: int, status_event: threading.Event = None, study_programs: List[str] = None):
+        self.org_id = org_id
+        self._status_event = status_event
+        self.email_client = EmailClient(email=mail_account, password=mail_password)
         self.email_processor = EmailProcessor()
         self.email_service = EmailService(self.email_client)
         self.llama = get_model_client()
-        self.email_classifier = EmailClassifier(self.llama)
+        self.email_classifier = EmailClassifier(self.llama, study_programs)
         self.response_service = ResponseService()
+
         self.MAX_RETRIES = 3
         self.RETRY_DELAY = 2
+        self._running = False
+        self._lock = threading.Lock()
+        self._current_status = "INACTIVE"  # or 'ACTIVE', 'ERROR'
+
         logging.info("EmailResponder initialized")
 
-    def start(self):
+    def set_credentials(self, username, password):
+        with self._lock:
+            self.email_client.username = username
+            self.email_client.password = password
+
+    def start_polling(self):
+        with self._lock:
+            if self._running:
+                logging.info("Responder is already running.")
+                return
+            self._running = True
+            self._current_status = "ACTIVE"
+
+        # Attempt initial connect
         try:
             self.email_client.connect()
-            while True:
+        except Exception as e:
+            logging.error(f"Initial mail client connect failed: {e}")
+            self._set_status("ERROR")
+            self._running = False
+            
+            # Signal that the initial connect attempt has completed
+            if self._status_event:
+                self._status_event.set()
+            return
+        
+        if self._status_event:
+            self._status_event.set()
+
+        # Main loop
+        try:
+            while self._is_running():
                 logging.info("Fetching new emails...")
                 raw_emails = self.email_service.fetch_raw_emails()
                 if not raw_emails:
                     logging.info("No new emails. Sleeping briefly before next check.")
                     time.sleep(30)
                     continue
+
                 emails = self.email_processor.process_raw_emails(raw_emails)
                 for email in emails:
                     if email.in_reply_to is None and len(email.references) == 0 and (
@@ -42,19 +81,44 @@ class EmailResponder:
                         self.email_service.flag_email(email.message_id)
                 logging.info("Sleeping for 60 seconds before next fetch")
                 time.sleep(60)
+
         except Exception as e:
             tb = traceback.format_exc()
-            logging.error("An error occurred: %s", e)
+            logging.error("An error occurred in EmailResponder: %s", e)
             logging.error("Traceback:\n%s", tb)
+            self._set_status("ERROR")
+
         finally:
             self.email_client.close_connections()
+            with self._lock:
+                self._running = False
+                if self._current_status != "ERROR":
+                    self._current_status = "INACTIVE"
+
+    def stop_polling(self):
+        with self._lock:
+            self._running = False
+            if self._current_status != "ERROR":
+                self._current_status = "INACTIVE"
+
+    def _is_running(self):
+        with self._lock:
+            return self._running
+
+    def get_status(self):
+        with self._lock:
+            return self._current_status
+
+    def _set_status(self, status):
+        with self._lock:
+            self._current_status = status
 
     def handle_classification(self, email, classification, study_program, language):
         try:
             response_content = None
             if classification.strip().lower() == "non-sensitive":
-                logging.info("should get a response now ")
                 payload = {
+                    "org_id": self.org_id,
                     "message": email.body,
                     "study_program": study_program,
                     "language": language,

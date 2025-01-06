@@ -13,6 +13,6 @@ def get_model_client() -> BaseModelClient:
         if not config.USE_AZURE == "true":
             return OpenAIModel(model=config.OPENAI_MODEL, api_key=config.OPENAI_API_KEY)
         else:
-            return AzureOpenAIModel(model=config.OPENAI_MODEL, azure_deployment=config.AZURE_DEPLOYMENT)
+            return AzureOpenAIModel(model=config.OPENAI_MODEL, azure_version=config.AZURE_VERSION, api_key=config.OPENAI_API_KEY, azure_endpoint=config.AZURE_ENDPOINT)
     else:
         return OllamaModel(model=config.GPU_MODEL, url=config.GPU_URL)

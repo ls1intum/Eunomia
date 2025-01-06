@@ -16,7 +16,7 @@ class EmailService:
 
         connection.select(folder)
         status, messages = connection.search(None, InboxType.Unseen.value, InboxType.Unflagged.value)
-
+        
         email_ids = messages[0].split()
 
         raw_emails = []

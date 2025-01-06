@@ -57,19 +57,6 @@ jobs:
           target: /home/${{ vars.VM_USERNAME }}/${{ github.repository }}
           debug: true
 
-      - name: Copy knowledge base From Repo to VM Host
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ vars.VM_HOST }}
-          username: ${{ vars.VM_USERNAME }}
-          key: ${{ secrets.VM_SSH_PRIVATE_KEY }}
-          proxy_host: ${{ vars.DEPLOYMENT_GATEWAY_HOST }}
-          proxy_username: ${{ vars.DEPLOYMENT_GATEWAY_USER }}
-          proxy_key: ${{ secrets.DEPLOYMENT_GATEWAY_SSH_KEY }}
-          proxy_port: ${{ vars.DEPLOYMENT_GATEWAY_PORT }}
-          source: "./knowledge"
-          target: /home/${{ vars.VM_USERNAME }}/${{ github.repository }}
-
       - name: SSH to VM and create .env.prod
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -99,7 +86,6 @@ jobs:
             echo "ANGELOS_URI=${{ vars.ANGELOS_URI }}" >> /home/${{ vars.VM_USERNAME }}/${{ github.repository }}/.env.prod
             echo "ANGELOS_PORT=${{ vars.ANGELOS_PORT }}" >> /home/${{ vars.VM_USERNAME }}/${{ github.repository }}/.env.prod
             echo "OPENAI_MODEL=${{ vars.OPENAI_MODEL }}" >> /home/${{ vars.VM_USERNAME }}/${{ github.repository }}/.env.prod
-            echo "STUDY_PROGRAMS_FOLDER=${{ vars.STUDY_PROGRAMS_FOLDER }}" >> /home/${{ vars.VM_USERNAME }}/${{ github.repository }}/.env.prod
             echo "ANGELOS_APP_API_KEY=${{ secrets.ANGELOS_APP_API_KEY }}" >> /home/${{ vars.VM_USERNAME }}/${{ github.repository }}/.env.prod
 
 

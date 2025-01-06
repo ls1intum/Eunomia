@@ -7,9 +7,9 @@ from app.common.environment import config
 
 
 class EmailClient:
-    def __init__(self):
-        self.username = config.EMAIL_ADDRESS
-        self.password = config.EMAIL_PASSWORD
+    def __init__(self, email: str, password: str):
+        self.username = email
+        self.password = password
         self.imap_server = config.IMAP_SERVER
         self.smtp_server = config.SMTP_SERVER
         self.imap_port = int(config.IMAP_PORT)
