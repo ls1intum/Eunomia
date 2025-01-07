@@ -83,8 +83,7 @@ jobs:
             echo "GPU_HOST=${{ vars.GPU_HOST }}" >> /home/${{ vars.VM_USERNAME }}/${{ github.repository }}/.env.prod
             echo "GPU_MODEL=${{ vars.GPU_MODEL }}" >> /home/${{ vars.VM_USERNAME }}/${{ github.repository }}/.env.prod
             echo "GPU_URL=${{ vars.GPU_URL }}" >> /home/${{ vars.VM_USERNAME }}/${{ github.repository }}/.env.prod
-            echo "ANGELOS_URI=${{ vars.ANGELOS_URI }}" >> /home/${{ vars.VM_USERNAME }}/${{ github.repository }}/.env.prod
-            echo "ANGELOS_PORT=${{ vars.ANGELOS_PORT }}" >> /home/${{ vars.VM_USERNAME }}/${{ github.repository }}/.env.prod
+            echo "ANGELOS_URL=${{ secrets.ANGELOS_URL }}" >> /home/${{ vars.VM_USERNAME }}/${{ github.repository }}/.env.prod
             echo "OPENAI_MODEL=${{ vars.OPENAI_MODEL }}" >> /home/${{ vars.VM_USERNAME }}/${{ github.repository }}/.env.prod
             echo "ANGELOS_APP_API_KEY=${{ secrets.ANGELOS_APP_API_KEY }}" >> /home/${{ vars.VM_USERNAME }}/${{ github.repository }}/.env.prod
 
