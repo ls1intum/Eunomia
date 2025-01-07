@@ -20,7 +20,6 @@ class ResponseService:
     def get_response(self, payload):
         """Send a request to the API endpoint with the given payload."""
         try:
-            logging.info(f"Sending POST request to {self.api_url} with headers {self.headers}")
             response = self.session.post(self.api_url, json=payload, headers=self.headers)
             response.raise_for_status()
             return response.json()
