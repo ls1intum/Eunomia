@@ -23,4 +23,4 @@ def shutdown_event():
     thread_manager.stop_all()
 
 # Include the router that handles mail endpoints
-app.include_router(mail_router, prefix="/mail", tags=["mail"])
+app.include_router(mail_router, prefix="/api/mail", tags=["mail"])
