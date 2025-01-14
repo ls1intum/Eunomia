@@ -1,4 +1,4 @@
-name: Deploy Eunomnia
+name: Deploy Eunomia
 
 on:
   push:
@@ -32,7 +32,7 @@ jobs:
           platforms: amd64, arm64
           file: ./Dockerfile
           context: .
-          tags: ghcr.io/ls1intum/eunomnia-app:latest
+          tags: ghcr.io/ls1intum/eunomia-app:latest
           push: true
 
   deploy:

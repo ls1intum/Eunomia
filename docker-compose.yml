@@ -1,7 +1,7 @@
 services:
-  eunomnia-app:
-    container_name: eunomnia-app
-    image: "ghcr.io/ls1intum/eunomnia-app:latest"
+  eunomia-app:
+    container_name: eunomia-app
+    image: "ghcr.io/ls1intum/eunomia-app:latest"
     restart: unless-stopped
     volumes:
       - ./knowledge:/app/knowledge

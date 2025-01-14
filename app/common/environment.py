@@ -2,8 +2,9 @@ import os
 
 from dotenv import load_dotenv
 
-if os.getenv("ENVIRONMENT") == "development":
-    load_dotenv("./../development.env")
+# if os.getenv("ENVIRONMENT") == "development":
+load_dotenv("./development.env")
+print("IMAP_PORT in .env:", os.getenv("IMAP_PORT"))
 
 
 class Config:
@@ -24,6 +25,12 @@ class Config:
     GPU_MODEL = os.getenv("GPU_MODEL")
     GPU_URL = os.getenv("GPU_URL")
 
+    USE_LOCAL_MODEL = os.getenv("USE_LOCAL_MODEL", "false")
+    LOCAL_API_KEY = os.getenv("LOCAL_API_KEY", "lm-studio")
+    LOCAL_MODEL = os.getenv("LOCAL_MODEL")
+    LOCAL_EMBED_MODEL = os.getenv("LOCAL_EMBED_MODEL")
+    LOCAL_ENDPOINT = os.getenv("LOCAL_ENDPOINT")
+
     # test
     TEST_EML_PATH = os.getenv("TEST_EML_PATH")
 
@@ -36,7 +43,6 @@ class Config:
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
     AZURE_ENDPOINT = os.getenv("OPENAI_ENDPOINT")
     AZURE_VERSION = os.getenv("OPENAI_VERSION")
-
 
 
 config = Config()
