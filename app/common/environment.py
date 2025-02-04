@@ -2,9 +2,8 @@ import os
 
 from dotenv import load_dotenv
 
-# if os.getenv("ENVIRONMENT") == "development":
-load_dotenv("./development.env")
-print("IMAP_PORT in .env:", os.getenv("IMAP_PORT"))
+if os.getenv("ENVIRONMENT") == "development":
+    load_dotenv("./../development.env")
 
 
 class Config:
