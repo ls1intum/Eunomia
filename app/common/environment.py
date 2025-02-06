@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 
 if os.getenv("ENVIRONMENT") == "development":
-    load_dotenv("./../development.env")
+    load_dotenv("./development.env")
 
 
 class Config:

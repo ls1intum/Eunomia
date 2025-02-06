@@ -1,8 +1,7 @@
 import logging
+import threading
 import time
 import traceback
-import threading
-
 from typing import List
 
 from app.email_classification.email_classifier import EmailClassifier
@@ -14,7 +13,8 @@ from app.models.model_loader import get_model_client
 
 
 class EmailResponder:
-    def __init__(self, mail_account: str, mail_password: str, org_id: int, status_event: threading.Event = None, study_programs: List[str] = None):
+    def __init__(self, mail_account: str, mail_password: str, org_id: int, status_event: threading.Event = None,
+                 study_programs: List[str] = None):
         self.org_id = org_id
         self._status_event = status_event
         self.email_client = EmailClient(email=mail_account, password=mail_password)
@@ -52,12 +52,12 @@ class EmailResponder:
             logging.error(f"Initial mail client connect failed: {e}")
             self._set_status("ERROR")
             self._running = False
-            
+
             # Signal that the initial connect attempt has completed
             if self._status_event:
                 self._status_event.set()
             return
-        
+
         if self._status_event:
             self._status_event.set()
 
@@ -67,7 +67,6 @@ class EmailResponder:
                 logging.info("Fetching new emails...")
                 raw_emails = self.email_service.fetch_raw_emails()
                 if not raw_emails:
-                    logging.info("No new emails. Sleeping briefly before next check.")
                     time.sleep(30)
                     continue
 
@@ -79,7 +78,6 @@ class EmailResponder:
                         self.handle_classification(email, classification, study_program, language)
                     else:
                         self.email_service.flag_email(email.message_id)
-                logging.info("Sleeping for 60 seconds before next fetch")
                 time.sleep(60)
 
         except Exception as e:

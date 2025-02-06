@@ -1,17 +1,20 @@
-from fastapi import APIRouter, HTTPException, Header, status, Depends
-from pydantic import BaseModel
 from typing import List
 
-from app.managers.thread_manager import thread_manager
+from fastapi import APIRouter, HTTPException, Header, status, Depends
+from pydantic import BaseModel
+
 from app.common.environment import config
+from app.managers.thread_manager import thread_manager
 
 router = APIRouter()
+
 
 class MailCredentials(BaseModel):
     mailAccount: str
     mailPassword: str
     studyPrograms: List[str]
-    
+
+
 def verify_api_key(x_api_key: str = Header(None)):
     if x_api_key is None or x_api_key != config.ANGELOS_APP_API_KEY:
         raise HTTPException(
@@ -20,13 +23,9 @@ def verify_api_key(x_api_key: str = Header(None)):
         )
     return True
 
+
 @router.post("/{org_id}/start", dependencies=[Depends(verify_api_key)])
 def start_thread(org_id: int, creds: MailCredentials):
-    """
-    Start the mail pipeline for this org with the given credentials.
-    - If thread is already running, we update credentials if needed (or just do nothing).
-    - If it's not running, we start it.
-    """
     """
     Start the mail pipeline for this org with the given credentials.
     If a thread is already running, handle it (stop if ERROR, update credentials if ACTIVE).
