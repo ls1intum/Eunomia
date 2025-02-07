@@ -2,10 +2,10 @@ from typing import Any
 
 from openai.lib.azure import AzureOpenAI
 
-from app.models.openai_model import OpenAIModel
+from app.models.openai_model import OpenAIBaseModel
 
 
-class AzureOpenAIModel(OpenAIModel):
+class AzureOpenAIBaseModel(OpenAIBaseModel):
     azure_endpoint: str
     azure_version: str
 

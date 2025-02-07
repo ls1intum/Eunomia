@@ -25,7 +25,7 @@ class OllamaModel(BaseModelClient):
     session: requests.Session = None
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
-    model_initialized: bool = False
+    initialized_model: bool = False
 
     def model_post_init(self, __context: Any) -> None:
         logging.info("Initializing OllamaModel")
@@ -79,8 +79,8 @@ class OllamaModel(BaseModelClient):
             self.session.close()
 
     def init_model(self):
-        if not self.model_initialized:
+        if not self.initialized_model:
             logging.info("Initializing Ollama model")
             self.complete([{"role": "user", "content": "Hi"}])
-            self.model_initialized = True
+            self.initialized_model = True
             logging.info("Initialized Ollama model")
