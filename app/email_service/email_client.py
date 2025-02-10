@@ -65,9 +65,11 @@ class EmailClient:
     def close_connections(self):
         if self.imap_connection:
             self.imap_connection.logout()
+            self.imap_connection = None
             logging.info("IMAP connection closed")
         if self.smtp_connection:
             self.smtp_connection.quit()
+            self.smtp_connection = None
             logging.info("SMTP connection closed")
 
     def connect(self):
@@ -87,7 +89,7 @@ class EmailClient:
         try:
             # The noop() method returns a tuple (code, message)
             code, _ = self.imap_connection.noop()
-            return code == 250
+            return code == "OK"
         except Exception as e:
             logging.info("IMAP connection is not alive: %s", e)
             return False

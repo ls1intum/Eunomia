@@ -69,7 +69,6 @@ class EmailResponder:
                 if not raw_emails:
                     time.sleep(30)
                     continue
-
                 emails = self.email_processor.process_raw_emails(raw_emails)
                 for email in emails:
                     if email.in_reply_to is None and len(email.references) == 0 and (
@@ -122,7 +121,7 @@ class EmailResponder:
                     "language": language,
                 }
                 response_content = self.response_service.get_response(payload)
-            if response_content:
+            if response_content and response_content['answer'] != "False":
                 self.email_service.send_reply_email(original_email=email, reply_body=response_content['answer'])
             else:
                 logging.info("No proper answer can be found or it is classified as sensitive")
@@ -147,6 +146,5 @@ class EmailResponder:
                     logging.error("Max retries reached for email: %s. Skipping this email.", email)
                     raise
                 else:
-                    # Optionally add a delay between retries
                     logging.info("Retrying... (attempt %d of %d)", attempt, self.MAX_RETRIES)
                     time.sleep(self.RETRY_DELAY)

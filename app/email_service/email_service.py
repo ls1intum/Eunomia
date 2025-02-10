@@ -51,7 +51,7 @@ class EmailService:
         email_uid = self.search_by_message_id(message_id)
         if email_uid:
             # Set both \Flagged and \Unseen flags
-            imap_conn = self.email_client.get_imap_connection();
+            imap_conn = self.email_client.get_imap_connection()
 
             result, response = imap_conn.uid('STORE', email_uid, '+FLAGS', r'(\Flagged \Seen)')
 
