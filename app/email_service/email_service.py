@@ -1,24 +1,30 @@
 import logging
+import datetime
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 from app.email_service.email_dto import EmailDTO, InboxType
 
-
 class EmailService:
     def __init__(self, email_client):
         self.email_client = email_client
 
-    def fetch_raw_emails(self, folder="inbox"):
+    def fetch_raw_emails(self, folder="inbox", since=None):
         logging.info("EmailFetcher fetching raw emails from folder: %s", folder)
         connection = self.email_client.get_imap_connection()
-
         connection.select(folder)
-        status, messages = connection.search(None, InboxType.Unseen.value, InboxType.Unflagged.value)
 
+        criteria = []
+        if since:
+            date_str = since.strftime("%d-%b-%Y")
+            criteria.extend(['SINCE', date_str])
+        
+        criteria.extend([InboxType.Unseen.value, InboxType.Unflagged.value])
+        
+        status, messages = connection.search(None, *criteria)
+        
         email_ids = messages[0].split()
-
         raw_emails = []
         for email_id in email_ids:
             res, msg = connection.fetch(email_id, "(RFC822)")
@@ -88,3 +94,12 @@ class EmailService:
             logging.info("Reply email sent to %s", from_address)
         except (smtplib.SMTPException, ConnectionError) as e:
             logging.error("Failed to send email due to %s. Attempting to reconnect and resend.", e)
+            try:
+                # Attempt to reconnect
+                self.email_client.connect_smtp()
+                smtp_conn = self.email_client.get_smtp_connection()
+                smtp_conn.send_message(msg)
+                logging.info("Reply email re-sent to %s", from_address)
+            except Exception as e2:
+                logging.error("Resend attempt failed: %s", e2)
+                raise

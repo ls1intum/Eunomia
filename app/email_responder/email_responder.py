@@ -1,6 +1,7 @@
 import logging
 import threading
 import time
+import datetime
 import traceback
 from typing import List
 
@@ -44,6 +45,7 @@ class EmailResponder:
                 return
             self._running = True
             self._current_status = "ACTIVE"
+            self._poll_start_time = datetime.datetime.now()
 
         # Attempt initial connect
         try:
@@ -65,7 +67,7 @@ class EmailResponder:
         try:
             while self._is_running():
                 logging.info("Fetching new emails...")
-                raw_emails = self.email_service.fetch_raw_emails()
+                raw_emails = self.email_service.fetch_raw_emails(since=self._poll_start_time)
                 if not raw_emails:
                     time.sleep(30)
                     continue
@@ -73,7 +75,14 @@ class EmailResponder:
                 for email in emails:
                     if email.in_reply_to is None and len(email.references) == 0 and (
                             email.spam == "NO" or email.spam is None):
-                        classification, language, study_program = self.classify_with_retries(email)
+                        try:
+                            classification, language, study_program = self.classify_with_retries(email)
+                        except Exception as e:
+                            logging.error("Classification failed for email %s: %s", email, e)
+                            # Optionally flag the email or handle it differently
+                            self.email_service.flag_email(email.message_id)
+                            # Continue processing the next email
+                            continue
                         self.handle_classification(email, classification, study_program, language)
                     else:
                         self.email_service.flag_email(email.message_id)
