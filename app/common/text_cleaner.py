@@ -7,7 +7,7 @@ class TextCleaner:
         # Remove special characters and punctuation
         text = re.sub(r'[^\w\s]', '', text)
         # Convert to lowercase
-        text = text.lower()
+        # text = text.lower()
         # Remove extra whitespace
         text = re.sub(r'\s+', ' ', text).strip()
         return text

@@ -44,10 +44,21 @@ class EmailClassifier(Classifier):
 
     @staticmethod
     def parse_classification_result(result):
-        parsed_result = json.loads(result)
+        try:
+            parsed_result = json.loads(result)
+        except json.JSONDecodeError as e:
+            # Fallback: if JSON parsing fails, attempt to remove markdown code fences
+            result_clean = result.strip()
+            if result_clean.startswith("```"):
+                lines = result_clean.splitlines()
+                lines = lines[1:]
+                if lines and lines[-1].startswith("```"):
+                    lines = lines[:-1]
+                result_clean = "\n".join(lines)
+            # Try parsing again
+            parsed_result = json.loads(result_clean)
         classification = parsed_result.get("classification", "").lower()
         language = parsed_result.get("language", "").lower()
         study_program = parsed_result.get("study_program", "").lower()
-        # confidence = int(result.get("confidence", "0%").strip("%"))
         logging.info(f"Classified as: {classification}, language: {language}, study_program: {study_program}")
         return classification, language, study_program

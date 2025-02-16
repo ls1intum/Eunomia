@@ -1,24 +1,30 @@
 import logging
+import datetime
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 from app.email_service.email_dto import EmailDTO, InboxType
 
-
 class EmailService:
     def __init__(self, email_client):
         self.email_client = email_client
 
-    def fetch_raw_emails(self, folder="inbox"):
+    def fetch_raw_emails(self, folder="inbox", since=None):
         logging.info("EmailFetcher fetching raw emails from folder: %s", folder)
         connection = self.email_client.get_imap_connection()
-
         connection.select(folder)
-        status, messages = connection.search(None, InboxType.Unseen.value, InboxType.Unflagged.value)
+
+        criteria = []
+        if since:
+            date_str = since.strftime("%d-%b-%Y")
+            criteria.extend(['SINCE', date_str])
+        
+        criteria.extend([InboxType.Unseen.value, InboxType.Unflagged.value])
+        
+        status, messages = connection.search(None, *criteria)
         
         email_ids = messages[0].split()
-
         raw_emails = []
         for email_id in email_ids:
             res, msg = connection.fetch(email_id, "(RFC822)")
@@ -29,10 +35,11 @@ class EmailService:
         return raw_emails
 
     def search_by_message_id(self, message_id):
-        self.email_client.imap_connection.select('inbox')
+        imap_conn = self.email_client.get_imap_connection()
+        imap_conn.select('inbox')
         logging.info(f"Searching for message with ID: {message_id}...")
 
-        result, data = self.email_client.imap_connection.uid('SEARCH', None, f'(HEADER Message-ID "{message_id}")')
+        result, data = imap_conn.uid('SEARCH', None, f'(HEADER Message-ID "{message_id}")')
 
         if result == 'OK':
             email_uids = data[0].split()
@@ -50,11 +57,13 @@ class EmailService:
         email_uid = self.search_by_message_id(message_id)
         if email_uid:
             # Set both \Flagged and \Unseen flags
-            result, response = self.email_client.imap_connection.uid('STORE', email_uid, '+FLAGS', '(\Flagged \Seen)')
+            imap_conn = self.email_client.get_imap_connection()
+
+            result, response = imap_conn.uid('STORE', email_uid, '+FLAGS', r'(\Flagged \Seen)')
 
             if result == 'OK':
                 # Now remove the \Seen flag to keep it unread
-                self.email_client.imap_connection.uid('STORE', email_uid, '-FLAGS', '(\Seen)')
+                imap_conn.uid('STORE', email_uid, '-FLAGS', r'(\Seen)')
                 logging.info(f"Email with UID {email_uid} has been successfully flagged and set to unread.")
             else:
                 logging.error(f"Failed to flag the email with UID {email_uid}.")
@@ -63,9 +72,6 @@ class EmailService:
 
     def send_reply_email(self, original_email: EmailDTO, reply_body):
         smtp_conn = self.email_client.get_smtp_connection()
-
-        if not smtp_conn:
-            self.email_client.connect_smtp()
 
         # Extract headers from the original email
         from_address = original_email.from_address
@@ -88,7 +94,12 @@ class EmailService:
             logging.info("Reply email sent to %s", from_address)
         except (smtplib.SMTPException, ConnectionError) as e:
             logging.error("Failed to send email due to %s. Attempting to reconnect and resend.", e)
-            self.email_client.connect_smtp()
-            smtp_conn = self.email_client.get_smtp_connection()
-            smtp_conn.send_message(msg)
-            logging.info("Reply email re-sent to %s after reconnection", from_address)
+            try:
+                # Attempt to reconnect
+                self.email_client.connect_smtp()
+                smtp_conn = self.email_client.get_smtp_connection()
+                smtp_conn.send_message(msg)
+                logging.info("Reply email re-sent to %s", from_address)
+            except Exception as e2:
+                logging.error("Resend attempt failed: %s", e2)
+                raise

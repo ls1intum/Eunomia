@@ -1,8 +1,8 @@
 import logging
-import time
-import traceback
 import threading
-
+import time
+import datetime
+import traceback
 from typing import List
 
 from app.email_classification.email_classifier import EmailClassifier
@@ -14,7 +14,8 @@ from app.models.model_loader import get_model_client
 
 
 class EmailResponder:
-    def __init__(self, mail_account: str, mail_password: str, org_id: int, status_event: threading.Event = None, study_programs: List[str] = None):
+    def __init__(self, mail_account: str, mail_password: str, org_id: int, status_event: threading.Event = None,
+                 study_programs: List[str] = None):
         self.org_id = org_id
         self._status_event = status_event
         self.email_client = EmailClient(email=mail_account, password=mail_password)
@@ -44,6 +45,7 @@ class EmailResponder:
                 return
             self._running = True
             self._current_status = "ACTIVE"
+            self._poll_start_time = datetime.datetime.now()
 
         # Attempt initial connect
         try:
@@ -52,12 +54,12 @@ class EmailResponder:
             logging.error(f"Initial mail client connect failed: {e}")
             self._set_status("ERROR")
             self._running = False
-            
+
             # Signal that the initial connect attempt has completed
             if self._status_event:
                 self._status_event.set()
             return
-        
+
         if self._status_event:
             self._status_event.set()
 
@@ -65,21 +67,25 @@ class EmailResponder:
         try:
             while self._is_running():
                 logging.info("Fetching new emails...")
-                raw_emails = self.email_service.fetch_raw_emails()
+                raw_emails = self.email_service.fetch_raw_emails(since=self._poll_start_time)
                 if not raw_emails:
-                    logging.info("No new emails. Sleeping briefly before next check.")
                     time.sleep(30)
                     continue
-
                 emails = self.email_processor.process_raw_emails(raw_emails)
                 for email in emails:
                     if email.in_reply_to is None and len(email.references) == 0 and (
                             email.spam == "NO" or email.spam is None):
-                        classification, language, study_program = self.classify_with_retries(email)
+                        try:
+                            classification, language, study_program = self.classify_with_retries(email)
+                        except Exception as e:
+                            logging.error("Classification failed for email %s: %s", email, e)
+                            # Optionally flag the email or handle it differently
+                            self.email_service.flag_email(email.message_id)
+                            # Continue processing the next email
+                            continue
                         self.handle_classification(email, classification, study_program, language)
                     else:
                         self.email_service.flag_email(email.message_id)
-                logging.info("Sleeping for 60 seconds before next fetch")
                 time.sleep(60)
 
         except Exception as e:
@@ -124,7 +130,7 @@ class EmailResponder:
                     "language": language,
                 }
                 response_content = self.response_service.get_response(payload)
-            if response_content:
+            if response_content and response_content['answer'] != "False":
                 self.email_service.send_reply_email(original_email=email, reply_body=response_content['answer'])
             else:
                 logging.info("No proper answer can be found or it is classified as sensitive")
@@ -149,6 +155,5 @@ class EmailResponder:
                     logging.error("Max retries reached for email: %s. Skipping this email.", email)
                     raise
                 else:
-                    # Optionally add a delay between retries
                     logging.info("Retrying... (attempt %d of %d)", attempt, self.MAX_RETRIES)
                     time.sleep(self.RETRY_DELAY)

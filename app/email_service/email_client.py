@@ -21,12 +21,12 @@ class EmailClient:
         logging.info("EmailClient initialized")
 
     def get_imap_connection(self):
-        if not self.imap_connection:
+        if not self.imap_connection and not self.is_imap_connection_alive():
             self.connect_imap()
         return self.imap_connection
 
     def get_smtp_connection(self):
-        if not self.smtp_connection:
+        if not self.smtp_connection and not self.is_smtp_connection_alive():
             self.connect_smtp()
         return self.smtp_connection
 
@@ -65,11 +65,31 @@ class EmailClient:
     def close_connections(self):
         if self.imap_connection:
             self.imap_connection.logout()
+            self.imap_connection = None
             logging.info("IMAP connection closed")
         if self.smtp_connection:
             self.smtp_connection.quit()
+            self.smtp_connection = None
             logging.info("SMTP connection closed")
 
     def connect(self):
         self.connect_imap()
         self.connect_smtp()
+
+    def is_smtp_connection_alive(self):
+        try:
+            # The noop() method returns a tuple (code, message)
+            code, _ = self.smtp_connection.noop()
+            return code == 250
+        except Exception as e:
+            logging.info("SMTP connection is not alive: %s", e)
+            return False
+
+    def is_imap_connection_alive(self):
+        try:
+            # The noop() method returns a tuple (code, message)
+            code, _ = self.imap_connection.noop()
+            return code == "OK"
+        except Exception as e:
+            logging.info("IMAP connection is not alive: %s", e)
+            return False
