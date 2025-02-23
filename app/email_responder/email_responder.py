@@ -129,7 +129,7 @@ class EmailResponder:
                     "study_program": study_program,
                     "language": language,
                 }
-                response_content = self.response_service.get_response(payload)
+                response_content = self.response_service.get_response(payload, sender_email=email.from_address)
             if response_content and response_content['answer'] != "False":
                 self.email_service.send_reply_email(original_email=email, reply_body=response_content['answer'])
             else:
