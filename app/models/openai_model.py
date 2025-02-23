@@ -8,12 +8,12 @@ from app.models.base_model import BaseModelClient
 
 class OpenAIBaseModel(BaseModelClient):
     api_key: str
+    temperature: float = 0.3
     _client: OpenAI
 
-    def __init__(self, client: Any, model: str, temperature: float = 0.3):
-        self._client = client
-        self.model = model
-        self.temperature = temperature
+    def model_post_init(self, __context: Any) -> None:
+        self._client = OpenAI(api_key=self.api_key)
+        self.init_model()
 
     def complete(self, prompt: list) -> str:
         response = self._client.chat.completions.create(
@@ -22,6 +22,7 @@ class OpenAIBaseModel(BaseModelClient):
             temperature=self.temperature
         )
         logging.info(f"Got response for model {self.model}: {response}")
-        # confidence = float(response['logprobs']['content']) if response.get('logprobs') and response['logprobs'].get(
-        #     'content') is not None else 0.81
         return response.choices[0].message.content
+    
+    def init_model(self) -> None:
+        logging.info("Initializing model...")

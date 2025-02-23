@@ -17,10 +17,12 @@ class ResponseService:
         """Helper function to set the authorization header."""
         self.headers = {"x-api-key": self.api_key, "Content-Type": "application/json"}
 
-    def get_response(self, payload):
+    def get_response(self, payload, sender_email):
         """Send a request to the API endpoint with the given payload."""
         try:
-            response = self.session.post(self.api_url, json=payload, headers=self.headers)
+            headers = self.headers.copy()
+            headers["X-Sender-Email"] = sender_email 
+            response = self.session.post(self.api_url, json=payload, headers=headers)
             response.raise_for_status()
             return response.json()
         except Exception as err:
