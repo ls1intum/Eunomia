@@ -1,7 +1,7 @@
+import datetime
 import logging
 import threading
 import time
-import datetime
 import traceback
 from typing import List
 
@@ -133,7 +133,8 @@ class EmailResponder:
             if response_content and response_content['answer'] != "False":
                 self.email_service.send_reply_email(original_email=email, reply_body=response_content['answer'])
             else:
-                logging.info("No proper answer can be found or it is classified as sensitive")
+                logging.info(
+                    f"No proper answer can be found: {response_content and response_content['answer'] == "False"} or it is classified as sensitive")
                 self.email_service.flag_email(email.message_id)
         except Exception as e:
             logging.error("Failed to send email response: %s", e)

@@ -71,7 +71,7 @@ class OllamaModel(BaseModelClient):
             logging.warning("Message content is missing in the response")
             return None
 
-        logging.info(f"Received prompt: {prompt}")
+        # logging.info(f"Received prompt: {prompt}")
         return message_content
 
     def close_session(self):
