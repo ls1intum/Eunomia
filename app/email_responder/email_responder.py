@@ -20,7 +20,7 @@ class EmailResponder:
         self._status_event = status_event
         self.email_client = EmailClient(email=mail_account, password=mail_password)
         self.email_processor = EmailProcessor()
-        self.email_service = EmailService(self.email_client)
+        self.email_service = EmailService(self.email_client, 3)
         self.llama = get_model_client()
         self.email_classifier = EmailClassifier(self.llama, study_programs)
         self.response_service = ResponseService()

@@ -75,6 +75,17 @@ class EmailClient:
     def connect(self):
         self.connect_imap()
         self.connect_smtp()
+        
+    def reconnect_imap(self):
+        logging.info("Reconnecting to IMAP server...")
+        if self.imap_connection:
+            try:
+                self.imap_connection.logout()
+            except Exception as e:
+                logging.error("Error during IMAP logout in reconnect: %s", e)
+            finally:
+                self.imap_connection = None
+        self.connect_imap()
 
     def is_smtp_connection_alive(self):
         try:
