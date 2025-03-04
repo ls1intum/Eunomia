@@ -1,5 +1,5 @@
 import logging
-import datetime
+import time
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -7,32 +7,44 @@ from email.mime.text import MIMEText
 from app.email_service.email_dto import EmailDTO, InboxType
 
 class EmailService:
-    def __init__(self, email_client):
+    def __init__(self, email_client, retries):
         self.email_client = email_client
+        self.max_retries = retries
 
     def fetch_raw_emails(self, folder="inbox", since=None):
         logging.info("EmailFetcher fetching raw emails from folder: %s", folder)
-        connection = self.email_client.get_imap_connection()
-        connection.select(folder)
+        for attempt in range(1, self.max_retries + 1):
+            try:
+                connection = self.email_client.get_imap_connection()
+                connection.select(folder)
 
-        criteria = []
-        if since:
-            date_str = since.strftime("%d-%b-%Y")
-            criteria.extend(['SINCE', date_str])
-        
-        criteria.extend([InboxType.Unseen.value, InboxType.Unflagged.value])
-        
-        status, messages = connection.search(None, *criteria)
-        
-        email_ids = messages[0].split()
-        raw_emails = []
-        for email_id in email_ids:
-            res, msg = connection.fetch(email_id, "(RFC822)")
-            for response_part in msg:
-                if isinstance(response_part, tuple):
-                    raw_emails.append(response_part[1])
-        logging.info("EmailFetcher fetched %d raw emails", len(raw_emails))
-        return raw_emails
+                criteria = []
+                if since:
+                    date_str = since.strftime("%d-%b-%Y")
+                    criteria.extend(['SINCE', date_str])
+                
+                criteria.extend([InboxType.Unseen.value, InboxType.Unflagged.value])
+                
+                status, messages = connection.search(None, *criteria)
+                
+                email_ids = messages[0].split()
+                raw_emails = []
+                for email_id in email_ids:
+                    res, msg = connection.fetch(email_id, "(RFC822)")
+                    for response_part in msg:
+                        if isinstance(response_part, tuple):
+                            raw_emails.append(response_part[1])
+                logging.info("EmailFetcher fetched %d raw emails", len(raw_emails))
+                return raw_emails
+            except Exception as e:
+                logging.error("Error fetching raw emails (attempt %d/%d): %s", attempt, self.max_retries, e)
+                try:
+                    self.email_client.reconnect_imap()
+                except Exception as recon_err:
+                    logging.error("Reconnection failed: %s", recon_err)
+                time.sleep(3)
+        logging.error("Max retries reached. Skipping email fetch for now.")
+        return []
 
     def search_by_message_id(self, message_id):
         imap_conn = self.email_client.get_imap_connection()
